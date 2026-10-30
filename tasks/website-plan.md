@@ -27,3 +27,14 @@ Stack: Vite + JavaScript modul, marked untuk Markdown dan DOMPurify untuk HTML a
 - npm audit --audit-level=high
 
 Risiko: data localStorage bisa hilang saat browser dibersihkan; ada ekspor JSON dan hapus melalui konfirmasi. Markdown disanitasi; catatan pengguna tidak masuk innerHTML. Tidak commit node_modules/dist, token, atau data latihan. Batas resmi: https://vite.dev/guide/static-deploy.html dan https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages .
+
+## Hasil verifikasi
+- `npm ci --ignore-scripts`, `npm run check`, `npm audit --audit-level=high`, dan `npm run build` berhasil; audit melaporkan 0 vulnerability. Build produksi dijalankan melalui Vite preview dan browser Chromium.
+- Semua enam panduan terbaca sebagai HTML; tautan internal Markdown menjadi rute website. Deep link glosarium bertahan setelah reload. Checklist, catatan, durasi, dan penanda minggu bertahan setelah reload.
+- Viewport 320, 768, 1024, dan 1440 px tidak menyebabkan overflow horizontal halaman hari ini. Tabel kurikulum berada dalam area gulir pada mobile. Screenshot lokal dan alamat publik diperiksa.
+- Audit axe pada halaman hari ini, kurikulum, dan progres menghasilkan 0 pelanggaran setelah penamaan landmark/tabel diperbaiki. Audit bukan jaminan aksesibilitas menyeluruh.
+- Deployment pertama berhasil: https://github.com/rahmadnoorikhsan/EnglishCourse/actions/runs/41135343522 . Website publik dibuka di https://rahmadnoorikhsan.github.io/EnglishCourse/ ; checklist, catatan, dan durasi bertahan setelah reload di origin publik. Tidak ada error JavaScript yang tertangkap pada skenario tersebut.
+- Ekspor publik menghasilkan unduhan `englishcourse-progres.json`; isi JSON diperiksa. Konfirmasi hapus mengosongkan catatan/checklist dan mengembalikan 0/26 minggu. Data simulasi dihapus dari browser pengujian.
+- Peringatan runtime Node 20 pada Actions pertama ditangani dengan rilis Actions terkini yang dipin ke commit SHA; aplikasi tetap dibangun memakai Node 22.
+- Workflow dengan Actions terbaru juga berhasil build dan deploy: https://github.com/rahmadnoorikhsan/EnglishCourse/actions/runs/41138023654 . Peringatan runtime Node 20 tidak muncul pada run ini; hanya pemberitahuan migrasi image `ubuntu-latest`.
+- Batas: belum menguji efektivitas belajar enam bulan, seluruh browser/perangkat, atau semua tautan sumber eksternal. Progres tetap lokal tanpa sinkronisasi atau impor JSON.
