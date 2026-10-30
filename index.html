@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ruang belajar bahasa Inggris dari dasar: latihan harian, kurikulum 26 minggu, dan panduan berbahasa Indonesia." />
+    <meta name="theme-color" content="#244c3b" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>EnglishCourse — Ruang belajar</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Langsung ke konten</a>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navigasi utama">
+        <a class="brand" href="#/hari-ini" aria-label="EnglishCourse beranda">
+          <span class="brand-mark" aria-hidden="true">e.</span>
+          <span><span class="brand-name">EnglishCourse</span><span class="brand-tag">SEDIKIT, SETIAP HARI.</span></span>
+        </a>
+        <nav>
+          <a class="nav-link" href="#/hari-ini" data-nav="hari-ini"><span aria-hidden="true">01</span> Belajar hari ini</a>
+          <a class="nav-link" href="#/kurikulum" data-nav="kurikulum"><span aria-hidden="true">02</span> Perjalanan 26 minggu</a>
+          <a class="nav-link" href="#/panduan" data-nav="panduan"><span aria-hidden="true">03</span> Panduan & sumber</a>
+          <a class="nav-link" href="#/progres" data-nav="progres"><span aria-hidden="true">04</span> Progres saya</a>
+        </nav>
+        <div class="sidebar-note"><span class="eyebrow">BUKAN BALAPAN.</span><p>Pahami satu hal.<br />Gunakan hari ini.<br />Ulangi besok.</p><small>Untuk pembelajar Indonesia,<br />mulai dari dasar.</small></div>
+      </aside>
+      <div class="workspace">
+        <header class="topbar"><span class="breadcrumb">RUANG BELAJAR / <span id="page-label">HARI INI</span></span><span class="topbar-meta">Mandiri, bukan sendirian.</span></header>
+        <div id="storage-alert" class="storage-alert" role="alert" hidden></div>
+        <main id="main" class="page" tabindex="-1"></main>
+        <footer class="site-footer"><span>Progres latihan bukan sertifikasi CEFR.</span><a href="#/panduan/riset">Dasar riset & batas target</a></footer>
+      </div>
+    </div>
+    <div id="status" class="status-message" role="status" aria-live="polite"></div>
+    <noscript>Aktifkan JavaScript untuk menggunakan ruang belajar dan menyimpan progres. Materi sumber juga tersedia di repository GitHub.</noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
