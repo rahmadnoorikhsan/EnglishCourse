@@ -101,3 +101,9 @@ Pemeriksaan JavaScript dan build berhasil. Smoke lokal pada 320/375/768/1024/144
 Link teks kecil pada sidebar, sumber video, sumber belajar, evaluasi, toolbar referensi, silabus, progres, dan footer diganti kontrol berbingkai dengan chevron dan area klik minimal 44 px. Sidebar memakai kartu Silabus dengan konteks 26 minggu; panah Unicode pada link pendukung diganti indikator CSS. Daftar isi punya hover permukaan, bukan underline. Link editorial di dalam Markdown sengaja tidak diubah. Label kartu referensi dan hasil pencarian diseragamkan menjadi Buka panduan.
 
 Check JavaScript dan build berhasil. Browser produksi lokal: kelas pada 320/375/768/1024/1440 px tanpa overflow; semua action-link terlihat memiliki tinggi minimal 44 px dan tanpa underline. Screenshot sidebar dan bagian bawah kelas diperiksa. Klik Silabus → Kurikulum lengkap → Semua panduan → dokumen bekerja; Back dari Silabus kembali ke kelas. Axe kelas dan dokumen: nol pelanggaran terdeteksi, satu pemeriksaan tidak lengkap. Tidak ada error aplikasi pada skenario ini.
+
+## Materi utama tanpa accordion
+
+Accordion catatan pelajaran dan kosakata dihapus, bukan sekadar diberi open. Penjelasan, contoh terjemahan, kosakata, dan kuis langsung tampil sesudah video. Layout 1280 px ke atas menempatkan kosakata di samping penjelasan; layar lebih kecil memakai satu kolom. Transkrip listening tetap terlipat untuk latihan pemahaman sebelum membaca. Pengaturan, outline mobile, dan catatan pribadi tidak diubah.
+
+Check JavaScript dan build lulus. Browser: screenshot desktop dan HP diperiksa; 320/375/768/1024/1440 px tanpa overflow, kosakata langsung terlihat dan tidak ada details bersarang di materi pendamping. Kuis memberikan 0/2 pada dua jawaban salah dan 2/2 pada jawaban benar. Minggu 26 hari 6 juga langsung menampilkan kosakata; transkrip input minggu 1 tetap tertutup. Axe halaman kelas: nol pelanggaran terdeteksi, satu pemeriksaan tidak lengkap; tidak ada error aplikasi pada smoke.
