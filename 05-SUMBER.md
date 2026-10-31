@@ -2,6 +2,8 @@
 
 Diperiksa 31 Oktober 2026. Kode di sini dipakai kurikulum. Audit berupa pembacaan halaman/deskripsi/transkrip, bukan penuntasan video, kuis, atau pembuatan akun.
 
+**Jalur website terpadu:** latihan inti kini tersedia sebagai materi asli EnglishCourse di dalam kelas: penjelasan Indonesia, contoh, bacaan, audio sintetis lokal, dan kuis. Hari 6 memakai paket latihan lokal berbeda. Daftar di bawah tetap referensi/pengayaan; tidak perlu membuka sumber eksternal untuk menyelesaikan paket lokal. Teks/kuis lokal tidak menyalin atau mengklaim setara dengan British Council/engVid. Video engVid disematkan melalui player YouTube setelah persetujuan klik, bukan diunduh ulang. Audio sintetis bukan model interaksi manusia atau tes listening resmi; evaluasi kompetensi tetap memakai bukti empat keterampilan dan feedback.
+
 ## Stack minimum dan akses
 
 Hari biasa: satu penjelasan engVid/grammar, satu sumber input British Council **atau** VOA, kartu review, rekaman/tulisan. Kamus sesuai kebutuhan. Akademik dan tes bukan aplikasi harian.

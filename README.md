@@ -6,11 +6,11 @@ Panduan berbahasa Indonesia untuk mulai dari nol, memakai **engVid sebagai bank 
 
 **https://rahmadnoorikhsan.github.io/EnglishCourse/**
 
-Website memakai alur kelas bertahap: **Belajar → satu langkah → Selesai & lanjut → ringkasan harian**. Buka **Daftar langkah** untuk memilih minggu/hari atau meninjau tugas sebelumnya. **Silabus** menampilkan 26 minggu dalam enam fase; **Referensi** memuat riset dan panduan; **Progres** menyimpan catatan aktivitas. Pengaturan durasi ada di bawah tugas. Materi eksternal terbuka pada tab baru; kembali ke kelas setelah berlatih.
+Website memakai alur kelas bertahap: **Belajar → satu langkah → Selesai & lanjut → ringkasan harian**. Buka **Daftar langkah** untuk memilih minggu/hari atau meninjau tugas sebelumnya. **Silabus** menampilkan 26 minggu dalam enam fase; **Referensi** memuat riset dan panduan; **Progres** menyimpan catatan aktivitas. Pengaturan durasi ada di bawah tugas. Penjelasan Indonesia, contoh, kosakata, bacaan, audio, dan soal tersedia langsung di kelas. Video engVid adalah pelengkap opsional; tidak wajib keluar website untuk latihan inti.
 
 Checklist dan catatan lama tetap digunakan. Progres disimpan **hanya di browser/perangkat yang sama**; tidak tersinkron atau terkirim ke GitHub. Ekspor JSON dari Progres untuk arsip. Menghapus data browser akan menghapus progres; jangan masukkan informasi sensitif. JSON adalah arsip, bukan fitur impor kembali. Tombol selesai mencatat aktivitas, bukan nilai atau kelulusan CEFR.
 
-Sumber Markdown di repository tetap menjadi sumber konten website, sehingga perubahan materi ikut dibangun saat deploy. Rekaman/tulisan tugas dikelola sendiri; website tidak merekam atau mengunggahnya.
+Sumber Markdown di repository tetap menjadi sumber kurikulum/referensi. Paket materi asli di `src/course-*.js` melengkapi kurikulum dengan teks dan soal lokal, bukan salinan pelajaran pihak ketiga. Draft ditulis di catatan harian (maksimal 5.000 karakter, dipakai bersama antar-langkah); rekaman berbicara dikelola sendiri dengan alat rekam perangkat. Website tidak merekam atau mengunggah audio pengguna.
 
 ## Target yang jujur
 
@@ -69,16 +69,18 @@ Pemeriksaan dan preview produksi:
 
 ```sh
 npm run check
+npm test
+npm run check:course
 npm audit --audit-level=high
 npm run build
 npm run preview -- --host 127.0.0.1
 ```
 
-Stack: Vite, JavaScript modul, marked, DOMPurify. `src/content.js` membaca enam dokumen asli, `src/views.js` menampilkan ruang belajar, `src/state.js` mengelola progres lokal. `dist/` dan `node_modules/` tidak di-commit. `.npmrc` memblokir lifecycle scripts dependency. Navigasi hash dan base aset relatif mendukung Pages pada subpath repository.
+Stack: Vite, JavaScript modul, marked, DOMPurify. `src/content.js` membaca enam dokumen asli, `src/lesson.js` dan `src/material.js` menampilkan kelas/materi lokal, `src/quiz.js` memeriksa soal, `src/views.js` menampilkan halaman pendukung, `src/state.js` mengelola progres lokal. `dist/` dan `node_modules/` tidak di-commit. `.npmrc` memblokir lifecycle scripts dependency. Navigasi hash dan base aset relatif mendukung Pages pada subpath repository.
 
 ## GitHub Actions dan Pages
 
-Repository publik: https://github.com/rahmadnoorikhsan/EnglishCourse . Workflow `.github/workflows/deploy.yml` melakukan `npm ci`, pemeriksaan sintaks, audit dependency, dan build pada pull request/push `main`. Hanya push `main` atau pemicu manual yang mengunggah artifact dan deploy. Pages dikonfigurasi memakai **GitHub Actions**, bukan deploy dari branch. Deployment memakai izin `pages:write` dan OIDC, tanpa token pribadi di source.
+Repository publik: https://github.com/rahmadnoorikhsan/EnglishCourse . Workflow `.github/workflows/deploy.yml` melakukan `npm ci`, pemeriksaan sintaks, tes perilaku kuis, validasi paket materi/audio, audit dependency, dan build pada pull request/push `main`. Hanya push `main` atau pemicu manual yang mengunggah artifact dan deploy. Pages dikonfigurasi memakai **GitHub Actions**, bukan deploy dari branch. Deployment memakai izin `pages:write` dan OIDC, tanpa token pribadi di source.
 
 Perubahan materi/kode → commit dan push ke `main` → buka tab Actions untuk hasil build/deploy. Untuk rollback, revert commit perubahan lalu push ke `main`; workflow membangun ulang versi tersebut. Jika repository dipindahkan, perbarui URL publik dalam README; base relatif tidak mengasumsikan nama repository tetap.
 
@@ -87,3 +89,13 @@ Verifikasi UI dilakukan pada build produksi melalui browser nyata; detail penger
 ## Perubahan UX ruang belajar
 
 Tampilan kelas menggantikan dashboard motivasional: satu tugas aktif, daftar langkah, navigasi sebelumnya/berikutnya, ringkasan harian, dan silabus berbentuk daftar modul. Arah struktur mengacu pada halaman modul [Coursera](https://www.coursera.org/learn/learning-how-to-learn) dan learning path [Dicoding](https://www.dicoding.com/academies/123-belajar-dasar-pemrograman-web), bukan salinan merek atau klaim akses classroom mereka. Riset dan target pembelajaran tidak diubah.
+
+## Materi, audio, dan batas penilaian
+
+- Setiap minggu memiliki penjelasan, contoh bilingual, kosakata, bacaan dan naskah audio asli, tugas speaking/writing, serta kuis dengan pembahasan. Hari 1–5 mengulang paket latihan dengan variasi tugas; hari 6 memakai paket bacaan/audio terpisah. Paket evaluasi yang sudah dibuka tidak lagi dianggap materi baru pada pengulangan minggu.
+- Pemutar audio memakai MP3 lokal, bukan layanan suara pengguna. Audio **sintetis eSpeak NG**, bukan rekaman penutur asli atau instrumen asesmen terstandar. Naskah/transkrip tersedia setelah mencoba. Nama, situasi, dan data latihan adalah fiktif; teks akademik simulasi bukan bukti penelitian.
+- Kuis pilihan ganda diperiksa di browser dan pembahasannya muncul di tempat. Jawaban/nilai kuis tidak disimpan setelah pindah langkah; catat hasil pertama di catatan harian. Tulisan, rekaman, interaksi, dan CEFR tidak dinilai otomatis.
+- Video engVid memakai player YouTube resmi, tanpa mengunduh/menyalin videonya. Player baru dimuat setelah tombol **Muat video di sini** ditekan; saat itu browser menghubungi YouTube/Google. Embed memerlukan internet dan dapat dibatasi penyedia, wilayah, atau browser. Materi inti tetap tersedia tanpa memuat player. [Dokumentasi embed](https://developers.google.com/youtube/player_parameters).
+- Materi British Council, Purdue, atau situs lain tidak disalin massal. Tautan pada Referensi adalah sumber tambahan, bukan prasyarat menuntaskan latihan lokal. Tidak ada klaim bahwa kuis lokal setara dengan asesmen sumber tersebut.
+
+Audio yang telah dibangun disimpan dalam `public/audio/`. Jika naskah listening diubah, pasang `espeak-ng` dan `ffmpeg`, lalu jalankan `node scripts/build-audio.mjs` dan commit MP3 yang dihasilkan. Build Pages hanya menyalin audio ini; tidak memerlukan mesin TTS atau API berbayar. Generator membangun audio latihan dan evaluasi terpisah untuk setiap minggu.

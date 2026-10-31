@@ -29,6 +29,10 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Check JavaScript
         run: npm run check
+      - name: Test quiz behavior
+        run: npm test
+      - name: Validate lesson packages and audio assets
+        run: npm run check:course
       - name: Audit dependencies
         run: npm audit --audit-level=high
       - name: Build static website

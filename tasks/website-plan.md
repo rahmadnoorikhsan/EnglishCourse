@@ -51,3 +51,19 @@ Verifikasi redesign pada Vite preview build produksi:
 - Daftar langkah terlipat pada mobile; memilih langkah menutupnya. Halaman belajar, silabus, referensi, dan progres tidak overflow horizontal pada 320/768/1024/1440 px. Screenshot desktop/mobile diperiksa.
 - Pencarian hasil kosong dan hasil cocok, deep link glosarium, penanda manual setelah reload, serta reset ke minggu 1/hari 1 diuji. Data simulasi dihapus.
 - Axe menghasilkan 0 pelanggaran pada belajar, silabus, pembaca kurikulum, dan progres. Fokus keyboard pada daftar langkah terlihat; tidak ada error JavaScript tertangkap pada skenario smoke. Ini bukan audit aksesibilitas menyeluruh.
+
+## Materi kelas terpadu
+
+Kelas kini memakai materi asli lokal untuk seluruh 26 minggu: penjelasan Indonesia, contoh bilingual, kosakata, bacaan, MP3 sintetis, kuis berjawaban/pembahasan, serta tugas speaking/writing dan review. Hari 1–5 memakai paket latihan; hari 6 memakai bacaan/audio berbeda. Sumber eksternal tetap pengayaan, bukan prasyarat. Video engVid memakai embed resmi yang dimuat hanya setelah klik; tidak ada unduhan ulang atau penyalinan massal latihan pihak ketiga. Tulisan/rekaman dan level CEFR tidak dinilai otomatis.
+
+Verifikasi lokal pada build produksi:
+- `npm run check`, `npm test` (3 tes), `node scripts/check-course.mjs`, dan `npm run build` berhasil. Validator memeriksa 26 paket dan 52 MP3. `npm audit --audit-level=high`: 0 vulnerabilities.
+- Browser menampilkan paket reading/listening di semua 26 minggu. Audio minggu 1 latihan dan minggu 26 evaluasi berhasil diputar (`readyState: 4`, waktu bergerak, durasi sekitar 27 dan 64 detik).
+- Kuis pola: jawaban kosong ditolak validasi form; jawaban salah memberi koreksi/pembahasan dan 0/2; jawaban benar 2/2. Dua kuis input minggu 1, termasuk paket hari 6 berbeda, memberi 2/2 untuk kunci masing-masing. Checklist tidak menghapus hasil kuis yang masih terbuka.
+- Draft bertahan setelah reload. Fixture progres v1 mempertahankan minggu 8/hari 3, 120 menit, dua checklist, catatan lama, dan penanda minggu 1–2. Empat langkah menghasilkan ringkasan 4/4; reload mempertahankan ringkasan; tombol lanjut membuka hari berikutnya. Minggu 26/hari 7 berakhir pada progres akhir.
+- Tidak ada overflow horizontal pada 320/768/1024/1440 px di materi pola, input evaluasi, output, silabus, dan progres. Screenshot desktop/mobile diperiksa. Tidak ada error JavaScript aplikasi pada skenario smoke.
+- Semua 52 URL MP3 pada preview merespons HTTP 200 dengan tipe audio. Axe pada halaman input/kuis terintegrasi minggu 1 menghasilkan 0 pelanggaran (42 pemeriksaan lulus); ini bukan audit aksesibilitas menyeluruh.
+- Review terpisah materi/integrasi selesai. Dua temuan interaksi direproduksi lalu diperbaiki: label tombol utama kini mengikuti toggle checklist, dan fokus keyboard berpindah ke iframe setelah tombol muat video diganti. Browser mengonfirmasi label dua arah dan `activeElement: IFRAME`; check, tes, dan build setelah perbaikan berhasil.
+- Sebelum klik, iframe video tidak ada. Sesudah klik, iframe YouTube resmi dimuat; E01 menampilkan “This video is unavailable” di browser verifikasi. ID cocok dengan halaman resmi engVid. Keberhasilan playback video tidak diklaim; teks, audio lokal, dan kuis tetap dapat digunakan tanpa player.
+
+Catatan keterbatasan: paket hari 6 yang pernah dibuka bukan input baru saat pengulangan; nilai kuis tidak disimpan setelah navigasi, hanya draft/checklist/catatan. Audio dibuat dengan eSpeak NG, bukan penutur asli atau asesmen terstandar. Rollback tetap revert commit dan deploy ulang; format localStorage tidak berubah.

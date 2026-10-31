@@ -325,3 +325,32 @@ noscript { display: block; padding: 1rem; background: #fffaeb; color: #93370d; }
   .prose img, .prose tr { break-inside: avoid; }
   .button { border-color: #ccc; background: #fff; color: #000; }
 }
+
+.day-instruction { margin: 0 0 1.5rem; color: var(--color-muted); font-size: 0.8125rem; }
+.lesson-material h2 { margin: 1.5rem 0 0.75rem; font-size: 1.125rem; }
+.lesson-material h3 { margin: 1rem 0 0.75rem; font-size: 0.9375rem; }
+.lesson-material details > summary { min-height: 44px; padding: 0.625rem 0; font-size: 0.875rem; font-weight: 600; }
+.example-list small { display: block; color: var(--color-muted); }
+.vocabulary-list { margin: 0; }
+.vocabulary-list > div { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); }
+.vocabulary-list dt { font-weight: 600; }
+.vocabulary-list dd { margin: 0; }
+.inline-quiz { margin: 1.5rem 0; padding-top: 0.5rem; border-top: 1px solid var(--color-border); }
+.inline-quiz fieldset { min-width: 0; margin: 1rem 0; padding: 0; border: 0; }
+.inline-quiz legend { margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 600; }
+.quiz-choice { display: flex; gap: 0.625rem; align-items: flex-start; min-height: 44px; padding: 0.625rem; border: 1px solid var(--color-border); border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.875rem; cursor: pointer; }
+.quiz-choice:has(input:checked) { border-color: var(--color-blue); background: var(--color-blue-soft); }
+.quiz-choice input { flex: 0 0 auto; margin: 0.3rem 0 0; accent-color: var(--color-blue); }
+.quiz-feedback { padding: 0.75rem; border-left: 3px solid var(--color-danger); background: var(--color-soft); font-size: 0.8125rem; }
+.quiz-feedback.is-correct { border-left-color: var(--color-success); }
+.quiz-result { margin: 0.75rem 0; font-size: 0.875rem; font-weight: 600; }
+.inline-quiz > small, .material-credit { color: var(--color-muted); font-size: 0.75rem; }
+.local-passage, .transcript > p { padding: 1rem; border: 1px solid var(--color-border); border-radius: 6px; background: var(--color-bg); }
+.local-passage > p, .transcript > p { white-space: pre-line; line-height: 1.85; }
+.local-passage > :last-child { margin-bottom: 0; }
+.listening-material audio { display: block; width: 100%; margin: 0.75rem 0; }
+.video-library { margin-top: 1.5rem; border-top: 1px solid var(--color-border); }
+.video-item { margin: 1rem 0; }
+.video-slot iframe { display: block; width: 100%; min-height: 200px; aspect-ratio: 16 / 9; border: 0; }
+.material-credit { margin: 1.5rem 0; padding-top: 1rem; border-top: 1px solid var(--color-border); }
+@media print { .video-library, .listening-material audio { display: none; } }

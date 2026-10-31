@@ -3,7 +3,9 @@ import { documents } from './content.js';
 import { curriculum, guides, reader, progress } from './views.js';
 import { lesson } from './lesson.js';
 import { escapeHtml } from './markdown.js';
-import { loadState, saveState, emptyState, getStorageWarning, sessionKey, checkKey, downloadProgress } from './state.js';
+import { loadState, saveState, emptyState, getStorageWarning, sessionKey, checkKey, checkedBlocks, downloadProgress } from './state.js';
+import { loadVideo } from './material.js';
+import { gradeQuiz } from './quiz.js';
 
 let state = loadState();
 let step = firstUnfinished();
@@ -94,8 +96,15 @@ main.addEventListener('change', event => {
   } else if (target.matches('[data-block]')) {
     const key = checkKey(state.week, state.day, Number(target.dataset.block));
     if (target.checked) state.checks[key] = true; else delete state.checks[key];
-    persist(); history.replaceState(null, '', lessonUrl()); render(false);
-    document.querySelector('[data-block]').focus(); announce('Progres langkah diperbarui.');
+    persist(); history.replaceState(null, '', lessonUrl());
+    const count = checkedBlocks(state);
+    main.querySelector('.outline-context progress').value = count;
+    main.querySelector('.outline-context small').textContent = `${count} dari 4 langkah selesai`;
+    const item = main.querySelector(`[data-step="${target.dataset.block}"]`);
+    item.querySelector('.step-indicator').textContent = target.checked ? '✓' : Number(target.dataset.block) + 1;
+    item.querySelector('small').textContent = `${target.checked ? 'Selesai · ' : ''}${state.minutes / 4} menit`;
+    main.querySelector('[data-action="complete-step"]').textContent = `${target.checked ? 'Lanjut' : 'Selesai & lanjut'} →`;
+    announce('Progres langkah diperbarui.');
   } else if (target.matches('[data-week-complete]')) {
     const week = Number(target.dataset.weekComplete);
     state.completed = target.checked ? [...new Set([...state.completed, week])] : state.completed.filter(n => n !== week);
@@ -115,7 +124,26 @@ main.addEventListener('input', event => {
     document.querySelector('#search-results').innerHTML = found.length ? found.map(doc => `<a class="doc-card" href="#/panduan/${doc.id}"><h2>${escapeHtml(doc.title)}</h2><p>${escapeHtml(doc.description)}</p><span>Baca panduan →</span></a>`).join('') : '<p class="empty-state" role="status">Tidak ada panduan yang cocok. Coba kata lain.</p>';
   }
 });
+main.addEventListener('submit', event => {
+  const form = event.target.closest('[data-quiz]');
+  if (!form) return;
+  event.preventDefault();
+  const fields = [...form.querySelectorAll('fieldset')];
+  const choices = fields.map(field => Number(field.querySelector('input:checked')?.value ?? -1));
+  const results = gradeQuiz(state.week, state.day, form.dataset.quiz, choices);
+  if (!results) return;
+  results.forEach((result, index) => {
+    const feedback = fields[index].querySelector('[data-feedback]');
+    feedback.hidden = false;
+    feedback.textContent = `${result.correct ? 'Benar.' : 'Belum tepat.'} Jawaban: ${result.answer}. ${result.explanation}`;
+    feedback.classList.toggle('is-correct', result.correct);
+  });
+  const score = results.filter(result => result.correct).length;
+  form.querySelector('.quiz-result').textContent = `${score} dari ${results.length} benar. Ini hasil latihan, bukan level CEFR.`;
+});
 main.addEventListener('click', event => {
+  const video = event.target.closest('[data-load-video]');
+  if (video) loadVideo(video.dataset.loadVideo, video.closest('[data-video-slot]'));
   const selected = event.target.closest('[data-step]');
   if (selected) navigateStep(Number(selected.dataset.step));
   const day = event.target.closest('[data-day]');
