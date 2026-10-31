@@ -1,6 +1,7 @@
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { documents } from './content.js';
+import { routeHref } from './router.js';
 import dailyCsv from '../tracker-harian.csv?url';
 import weeklyCsv from '../tracker-mingguan.csv?url';
 
@@ -15,12 +16,12 @@ export function markdown(source, documentId = '') {
     const href = link.getAttribute('href') || '';
     const [file, fragment] = href.split('#');
     const doc = documents.find(item => item.file === file);
-    if (doc) link.setAttribute('href', `#/panduan/${doc.id}${fragment ? `/${encodeURIComponent(fragment)}` : ''}`);
+    if (doc) link.setAttribute('href', routeHref(`panduan/${doc.id}${fragment ? `/${encodeURIComponent(fragment)}` : ''}`));
     else if (downloads[file]) {
       link.setAttribute('href', downloads[file]);
       link.setAttribute('download', file);
     } else if (href.startsWith('#') && !href.startsWith('#/') && documentId) {
-      link.setAttribute('href', `#/panduan/${documentId}/${encodeURIComponent(href.slice(1))}`);
+      link.setAttribute('href', routeHref(`panduan/${documentId}/${encodeURIComponent(href.slice(1))}`));
     } else if (/^https?:\/\//.test(href)) {
       link.setAttribute('target', '_blank');
       link.setAttribute('rel', 'noopener noreferrer');
@@ -42,7 +43,7 @@ export function markdown(source, documentId = '') {
 export function toc(source, documentId) {
   return source.split('\n').filter(line => /^## /.test(line)).map(line => {
     const title = line.slice(3).replace(/[*`]/g, '');
-    return `<a class="toc-link" href="#/panduan/${documentId}/${encodeURIComponent(slug(title))}">${escapeHtml(title)}</a>`;
+    return `<a class="toc-link" href="${escapeHtml(routeHref(`panduan/${documentId}/${encodeURIComponent(slug(title))}`))}">${escapeHtml(title)}</a>`;
   }).join('');
 }
 

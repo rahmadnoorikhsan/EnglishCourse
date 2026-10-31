@@ -75,3 +75,11 @@ Pengguna mengoreksi bahwa materi buatan asisten tidak boleh menggantikan video s
 Koreksi bukti pemutar: E01 berhasil diputar pada domain Pages publik; video Ronnie berdurasi 10:12, `paused: false`, waktu bergerak. Kegagalan sebelumnya pada preview localhost tidak membuktikan video sumber tidak tersedia. Preview lokal pada pemeriksaan koreksi masih menunjukkan unavailable; player publik yang dijalankan berhasil. Tidak ada klaim semua 12 video sudah ditonton atau diuji playback-nya.
 
 Check JavaScript, 3 tes kuis, dan build berhasil. Screenshot desktop/mobile diperiksa; pada 375 px tidak overflow, video terlihat dan tambahan terlipat. Pustaka minggu 9 memuat 12 pilihan; kuis tambahan minggu 1 tetap memberi 2/2 untuk jawaban benar. Tidak ada error JavaScript aplikasi pada skenario koreksi.
+
+## Navigasi URL bersih
+
+Keluhan Back/direct URL ditangani dengan History API, bukan mengganti kosmetik tombol. Perpindahan langkah/halaman memakai pushState, popstate memulihkan tampilan, dan checklist tidak membuat entri riwayat. Semua tautan internal dipindahkan dari hash ke `/belajar/{minggu}/{hari}/{video|input|output|review|ringkasan}/`, `/silabus/`, `/referensi/`, dan `/progres/`. Anchor panduan memakai hash biasa hanya untuk bagian dokumen. Format progres v1 tetap sama.
+
+GitHub Pages tidak menyediakan SPA rewrite. Build karena itu menghasilkan 1.128 direktori rute dengan index HTML nyata, ditambah root; bukan 404 redirect atau query-string workaround. Base produksi `/EnglishCourse/`, dev `/`. Semua aset memakai base produksi sehingga direct deep link tidak mencari JS/audio/favicon pada direktori langkah.
+
+Verifikasi produksi lokal pada port 4174: 1.129 URL HTML hasil build merespons HTTP 200. Tujuh tes (kuis dan routing) lulus; build berhasil. Browser: complete → Back → Forward → reload mempertahankan langkah yang tepat; silabus → Back kembali ke input; perpindahan minggu bisa dibalik/diulang; checklist tidak menambah history. Direct minggu 26/hari 6/output mempertahankan draft setelah ke Progres, Back, dan reload. Anchor panduan bertahan reload dan Back kembali ke dokumen. Hari istirahat akhir tetap menuju progres akhir. Mobile 375 px tidak overflow; tidak ada error JavaScript aplikasi; axe halaman referensi 0 pelanggaran (34 pemeriksaan lulus).

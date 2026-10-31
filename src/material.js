@@ -1,6 +1,7 @@
 import { course } from './course.js';
 import { videos } from './videos.js';
 import { markdown, escapeHtml as esc } from './markdown.js';
+import { routeHref } from './router.js';
 
 const dayInstructions = [
   'Pelajari penjelasan dan contoh. Simpan percobaan awal sebelum membuka bantuan.',
@@ -39,9 +40,9 @@ export function material(week, day, step) {
   } else if (step === 2) {
     content = `<section class="prose"><h2>Latihan berbicara</h2><p>${esc(item.output.speaking)}</p><p>${day===1?'Rekam respons pertama sebelum meniru contoh.':'Ubah konteks atau contoh dari latihan sebelumnya; jangan hanya membaca naskah yang sama.'}</p><h2>Latihan menulis</h2><p>${esc(item.output.writing)}</p><p>Tulis draft di bawah. Simpan versi awal sebelum mengoreksi. Gunakan nama dan data fiktif untuk simulasi; jangan masukkan informasi sensitif.</p><h3>Periksa sendiri</h3><ul><li>Apakah maksud utama dan detailnya jelas?</li><li>Apakah pola bahasa minggu ini digunakan dengan tepat?</li><li>Apakah contoh dan klaim didukung oleh teks, atau sudah ditandai sebagai pendapat/simulasi?</li></ul><p>Jawaban terbuka tidak dinilai otomatis. Minta feedback manusia bila tersedia. Rekaman dikelola sendiri dengan alat rekam perangkat; website tidak mengunggah rekaman.</p></section>`;
   } else {
-    content = `<section class="prose"><h2>Ulangi & perbaiki</h2><p>${esc(item.review)}</p><ol><li>Tutup contoh. Ucapkan kembali ide utama dari tiga sampai lima kata kunci.</li><li>Bandingkan draft awal dan revisi. Pilih dua kesalahan prioritas, lalu tulis contoh baru.</li><li>Catat hasil pertama kuis, bantuan yang dipakai, serta satu hal yang perlu diulang.</li></ol>${assess?'<p>Jika paket ini pernah dilihat, jangan mencatatnya sebagai evaluasi materi baru. Audio sintetis dan kuis singkat tidak menetapkan level bahasa. Gunakan rubrik empat keterampilan untuk keputusan lanjut/ulang.</p><a href="#/panduan/evaluasi">Buka rubrik evaluasi di website ini →</a>':''}<h3>Hasil minggu ini</h3>${markdown(week.outcome)}</section>`;
+    content = `<section class="prose"><h2>Ulangi & perbaiki</h2><p>${esc(item.review)}</p><ol><li>Tutup contoh. Ucapkan kembali ide utama dari tiga sampai lima kata kunci.</li><li>Bandingkan draft awal dan revisi. Pilih dua kesalahan prioritas, lalu tulis contoh baru.</li><li>Catat hasil pertama kuis, bantuan yang dipakai, serta satu hal yang perlu diulang.</li></ol>${assess?`<p>Jika paket ini pernah dilihat, jangan mencatatnya sebagai evaluasi materi baru. Audio sintetis dan kuis singkat tidak menetapkan level bahasa. Gunakan rubrik empat keterampilan untuk keputusan lanjut/ulang.</p><a href="${routeHref('panduan/evaluasi')}">Buka rubrik evaluasi di website ini →</a>`:''}<h3>Hasil minggu ini</h3>${markdown(week.outcome)}</section>`;
   }
-  return `<section class="lesson-material"><p class="day-instruction">Hari ${day} · ${dayInstructions[day-1]}</p>${step === 0 ? '' : '<p class="material-credit">Latihan pendamping buatan EnglishCourse, bukan materi atau penilaian resmi engVid. Video asli ada pada langkah pertama.</p>'}${content}<p class="material-credit">Video asli: engVid melalui player YouTube resmi. Penjelasan tambahan, teks, audio sintetis, dan soal lokal: buatan EnglishCourse, bukan salinan sumber. <a href="#/panduan/sumber">Referensi kurikulum</a>.</p></section>`;
+  return `<section class="lesson-material"><p class="day-instruction">Hari ${day} · ${dayInstructions[day-1]}</p>${step === 0 ? '' : '<p class="material-credit">Latihan pendamping buatan EnglishCourse, bukan materi atau penilaian resmi engVid. Video asli ada pada langkah pertama.</p>'}${content}<p class="material-credit">Video asli: engVid melalui player YouTube resmi. Penjelasan tambahan, teks, audio sintetis, dan soal lokal: buatan EnglishCourse, bukan salinan sumber. <a href="${routeHref('panduan/sumber')}">Referensi kurikulum</a>.</p></section>`;
 }
 
 
