@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 
+import numpy as np
 import onnxruntime as ort
 import soundfile as sf
 from kokoro_onnx import Kokoro
@@ -24,7 +25,13 @@ output.mkdir(parents=True, exist_ok=True)
 with tempfile.TemporaryDirectory(prefix="englishcourse-neural-") as temp:
     for item in json.load(sys.stdin):
         speed = 0.85 if item["week"] < 5 else 0.93 if item["week"] < 14 else 1.0
-        audio, rate = engine.create(item["text"], voice="af_heart", speed=speed, lang="en-us")
+        parts = []
+        for index, segment in enumerate(item["segments"]):
+            audio, rate = engine.create(segment["text"], voice=segment["voice"], speed=speed, lang="en-us")
+            if index:
+                parts.append(np.zeros(round(rate * 0.3), dtype=audio.dtype))
+            parts.append(audio)
+        audio = np.concatenate(parts)
         wav = Path(temp) / "speech.wav"
         mp3 = Path(temp) / "speech.mp3"
         sf.write(wav, audio, rate)

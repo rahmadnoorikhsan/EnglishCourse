@@ -32,3 +32,9 @@ Checklist ini untuk pengerjaan dokumen, bukan daftar tugas belajar harian.
 - [x] Hash 52 file berubah; seluruh MP3 lolos dekode penuh ffmpeg tanpa error, mono 24 kHz, durasi 19,94–59,77 detik. SHA256 model dan voices cocok dengan rilis resmi. Uji model tidak ditemukan gagal dengan jelas dan mempertahankan hash seluruh 52 audio lama.
 - [x] Browser halaman input minggu 1 memutar MP3 baru: durasi 21,43 detik, waktu melewati satu detik, `paused: false`, transkrip tetap tertutup. Label menjelaskan suara AI neural, bukan rekaman manusia atau asesmen terstandar. URL versi baru mencegah pemakaian cache audio lama.
 - [x] `npm run check`, 50 tes, validator 26 paket/52 audio, dan build produksi lulus; audit npm menemukan 0 vulnerabilities. Peringatan bundle JS >500 kB tetap ada. Pemeriksaan dekode/playback bukan penilaian manusia atas naturalness atau ketepatan setiap pelafalan.
+
+## Dialog multi-suara — 1 November 2026
+
+- [x] 50 dialog dan dua narasi dibangun ulang: dua suara perempuan (`af_heart`, `af_bella`) dan dua laki-laki (`am_michael`, `am_puck`), konsisten per tokoh, jeda 300 ms. Label tokoh tidak diucapkan; teks ucapan, transkrip, soal, dan tugas tetap. Pemeran per naskah eksplisit, termasuk alias Rio/Riko dan tiga suara berbeda pada minggu 16.
+- [x] Empat regresi pembagian giliran lulus, termasuk label beberapa kata, paragraf, tokoh tak dikenal, giliran kosong, dan narasi. Seluruh 52 paket mempertahankan isi ucapan kanonis setelah label dihapus. `npm run check`, 54 tes, dan audit npm lulus (0 vulnerabilities).
+- [x] Seluruh 52 MP3 lolos dekode penuh ffmpeg tanpa error, mono 24 kHz, durasi 17,45–61,92 detik. Browser mobile 390 px memutar latihan minggu 1 dan evaluasi minggu 16 dengan waktu bergerak, `paused: false`, tanpa error aplikasi; transkrip awal tetap tertutup dan tidak ada overflow horizontal pada halaman minggu 1. Pemeriksaan teknis ini bukan audit manusia atas kualitas setiap ujaran pendek.
