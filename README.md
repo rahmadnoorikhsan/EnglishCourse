@@ -6,7 +6,9 @@ Panduan berbahasa Indonesia untuk mulai dari nol, memakai **engVid sebagai bank 
 
 **https://rahmadnoorikhsan.github.io/EnglishCourse/**
 
-Tidak perlu membuka Markdown untuk belajar. Website menyediakan latihan harian dengan pemilih minggu/hari/durasi, checklist, catatan otomatis, kurikulum, pencarian panduan, serta pembaca seluruh materi. Checklist dan catatan disimpan **hanya di browser/perangkat yang sama**; tidak tersinkron atau terkirim ke GitHub. Ekspor JSON dari Progres saya untuk arsip. Menghapus data browser akan menghapus progres; jangan masukkan informasi sensitif. JSON adalah arsip, bukan fitur impor kembali.
+Website memakai alur kelas bertahap: **Belajar → satu langkah → Selesai & lanjut → ringkasan harian**. Buka **Daftar langkah** untuk memilih minggu/hari atau meninjau tugas sebelumnya. **Silabus** menampilkan 26 minggu dalam enam fase; **Referensi** memuat riset dan panduan; **Progres** menyimpan catatan aktivitas. Pengaturan durasi ada di bawah tugas. Materi eksternal terbuka pada tab baru; kembali ke kelas setelah berlatih.
+
+Checklist dan catatan lama tetap digunakan. Progres disimpan **hanya di browser/perangkat yang sama**; tidak tersinkron atau terkirim ke GitHub. Ekspor JSON dari Progres untuk arsip. Menghapus data browser akan menghapus progres; jangan masukkan informasi sensitif. JSON adalah arsip, bukan fitur impor kembali. Tombol selesai mencatat aktivitas, bukan nilai atau kelulusan CEFR.
 
 Sumber Markdown di repository tetap menjadi sumber konten website, sehingga perubahan materi ikut dibangun saat deploy. Rekaman/tulisan tugas dikelola sendiri; website tidak merekam atau mengunggahnya.
 
@@ -22,7 +24,7 @@ Penjelasan bukti, asumsi, dan batasannya: [01-RISET.md](01-RISET.md). Ini sistem
 
 1. Pilih waktu fokus realistis: 60, 120, 180, atau 240 menit per hari belajar. Ada konsekuensi terhadap target dan kemungkinan durasi program; lihat sistem harian.
 2. Siapkan alat rekam bawaan HP/laptop, catatan, dan kartu kertas atau Anki. Tidak wajib tutor berbayar, akun tes, atau langganan AI.
-3. Buka **[Belajar hari ini](https://rahmadnoorikhsan.github.io/EnglishCourse/#/hari-ini)**. Hari 1 sudah ditentukan; tidak perlu mencari materi sendiri.
+3. Buka **[Belajar](https://rahmadnoorikhsan.github.io/EnglishCourse/#/hari-ini)**. Mulai dari Minggu 1, Hari 1; jalankan tugas lalu pilih **Selesai & lanjut**. Tidak perlu membuka semua materi sekaligus.
 4. Rekam perkenalan sebisanya **sebelum meniru**. Jika belum bisa, tulis “belum bisa”—itu baseline, bukan kegagalan.
 5. Gunakan [VOA Lesson 1](https://learningenglish.voanews.com/a/lets-learn-english-lesson-one/3111026.html) dan bagian pendek [engVid: TO BE](https://www.engvid.com/basic-english-grammar-to-be/). Hasil hari 1: tiga kalimat tentang diri dan satu rekaman pendek setelah latihan.
 6. Catat menit nyata dan hasil di tracker. Jika hari pertama hanya tersedia 20 menit, lakukan versi darurat di sistem harian; jangan mencatatnya sebagai tiga jam.
@@ -81,3 +83,7 @@ Repository publik: https://github.com/rahmadnoorikhsan/EnglishCourse . Workflow 
 Perubahan materi/kode → commit dan push ke `main` → buka tab Actions untuk hasil build/deploy. Untuk rollback, revert commit perubahan lalu push ke `main`; workflow membangun ulang versi tersebut. Jika repository dipindahkan, perbarui URL publik dalam README; base relatif tidak mengasumsikan nama repository tetap.
 
 Verifikasi UI dilakukan pada build produksi melalui browser nyata; detail pengerjaan ada di `tasks/website-plan.md`. Tidak ada klaim skor pengguna atau sertifikasi otomatis.
+
+## Perubahan UX ruang belajar
+
+Tampilan kelas menggantikan dashboard motivasional: satu tugas aktif, daftar langkah, navigasi sebelumnya/berikutnya, ringkasan harian, dan silabus berbentuk daftar modul. Arah struktur mengacu pada halaman modul [Coursera](https://www.coursera.org/learn/learning-how-to-learn) dan learning path [Dicoding](https://www.dicoding.com/academies/123-belajar-dasar-pemrograman-web), bukan salinan merek atau klaim akses classroom mereka. Riset dan target pembelajaran tidak diubah.

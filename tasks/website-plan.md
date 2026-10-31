@@ -38,3 +38,16 @@ Risiko: data localStorage bisa hilang saat browser dibersihkan; ada ekspor JSON 
 - Peringatan runtime Node 20 pada Actions pertama ditangani dengan rilis Actions terkini yang dipin ke commit SHA; aplikasi tetap dibangun memakai Node 22.
 - Workflow dengan Actions terbaru juga berhasil build dan deploy: https://github.com/rahmadnoorikhsan/EnglishCourse/actions/runs/41138023654 . Peringatan runtime Node 20 tidak muncul pada run ini; hanya pemberitahuan migrasi image `ubuntu-latest`.
 - Batas: belum menguji efektivitas belajar enam bulan, seluruh browser/perangkat, atau semua tautan sumber eksternal. Progres tetap lokal tanpa sinkronisasi atau impor JSON.
+
+## Redesign UX kelas
+
+Pengguna meminta UX profesional, clean, modern, dan bertahap seperti Coursera/Dicoding. Halaman modul publik Coursera dan learning path Dicoding ditinjau; classroom berbayar/login tidak diakses. Hero, slogan, ringkasan besar sebelum tugas, dan grid minggu diganti dengan navigasi ringkas, satu langkah aktif, outline, serta silabus accordion. `src/lesson.js` memiliki tampilan tugas; rute `#/hari-ini/minggu/hari/langkah` dapat dibuka ulang. Catatan dan checklist tetap memakai format localStorage v1 tanpa migrasi/destruksi data.
+
+Verifikasi redesign pada Vite preview build produksi:
+- `npm run check` dan `npm run build` berhasil.
+- Smoke Node dengan data v1 lama mempertahankan minggu, hari, durasi, dua checklist, catatan, dan penanda minggu setelah load/save.
+- Browser: empat tombol Selesai & lanjut menghasilkan ringkasan 4/4; reload tetap pada ringkasan; lanjut hari berikutnya membuka langkah pertama. Catatan bertahan pindah langkah dan reload. Durasi 60 menit menampilkan 15 menit per langkah.
+- Hari 6 → ringkasan → hari istirahat tanpa tugas → minggu berikutnya. Minggu 26/hari 7 berakhir pada tautan progres, bukan minggu 27. Semua 26 minggu dan enam fase tersedia.
+- Daftar langkah terlipat pada mobile; memilih langkah menutupnya. Halaman belajar, silabus, referensi, dan progres tidak overflow horizontal pada 320/768/1024/1440 px. Screenshot desktop/mobile diperiksa.
+- Pencarian hasil kosong dan hasil cocok, deep link glosarium, penanda manual setelah reload, serta reset ke minggu 1/hari 1 diuji. Data simulasi dihapus.
+- Axe menghasilkan 0 pelanggaran pada belajar, silabus, pembaca kurikulum, dan progres. Fokus keyboard pada daftar langkah terlihat; tidak ada error JavaScript tertangkap pada skenario smoke. Ini bukan audit aksesibilitas menyeluruh.
