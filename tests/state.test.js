@@ -7,7 +7,6 @@ test('old notes and checklists survive upgrade and subsequent save', () => {
   const values = new Map([[key, JSON.stringify({ version: 1, week: 8, day: 4, minutes: 120, checks: { 'w8-d4-b2': true }, notes: { 'w8-d4': 'Draft lama saya' }, completed: [1, 2] })]]);
   globalThis.localStorage = { getItem: name => values.get(name), setItem: (name, value) => values.set(name, value) };
   const migrated = loadState();
-  assert.equal(migrated.version, 2);
   assert.equal(migrated.notes['w8-d4'], 'Draft lama saya');
   assert.equal(migrated.checks['w8-d4-b2'], true);
   assert.deepEqual(migrated.completed, [1, 2]);

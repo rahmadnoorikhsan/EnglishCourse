@@ -1,0 +1,29 @@
+services:
+  assessment:
+    image: node:22-alpine
+    init: true
+    command: [node, server/assessment.mjs]
+    working_dir: /app
+    user: "1000:1000"
+    env_file: .env
+    volumes:
+      - ./server:/app/server:ro
+      - ./src:/app/src:ro
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    restart: unless-stopped
+    networks:
+      ingress:
+        aliases: [englishcourse-assessment]
+      router: {}
+networks:
+  ingress:
+    external: true
+    name: cold-calling_default
+  router:
+    external: true
+    name: cold-calling_nine-router-egress

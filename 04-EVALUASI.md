@@ -94,3 +94,11 @@ Isi [template evaluasi](06-TEMPLATE.md), lampirkan:
 7. Tes eksternal bila ada: nama/versi/tanggal, skor per skill; nyatakan jika tidak diambil.
 
 Tulis: **“Saya mampu [tugas] pada [topik/tingkat] dengan [bantuan], bukti [berkas/tanggal]. Saya belum mampu [gap].”** Jika belum C1, jangan mengganti namanya menjadi “fluent” karena sudah enam bulan. Tentukan siklus lanjutan 12 minggu yang berfokus dua gap terbesar dan kebutuhan institusi/pekerjaan nyata.
+
+## 8. Tes dan submission di website
+
+Langkah **Review** menyediakan empat soal pemahaman orisinal per minggu, pembahasan setelah menjawab, dan tugas transfer tulisan/rekaman. Ambang 3/4 hanya cek pemahaman; checklist, durasi, atau skor tersebut tidak meluluskan minggu. Pengulangan dicatat terpisah dan tidak dianggap materi baru. Minggu 4, 8, 12, 16, 20, 24, dan 26 memiliki tugas integratif fase tersendiri, bukan memakai ulang submission mingguan.
+
+Submission AI memerlukan token pelajar dan persetujuan pengiriman teks/audio melalui backend pribadi ke 9router. Kiriman disimpan lebih dahulu di browser; feedback yang valid ditambahkan sebagai snapshot terkait, sedangkan revisi menjadi kiriman baru yang mengacu pada induk. Menilai ulang kiriman yang sama bukan percobaan mandiri baru. Nilai AI minimal 8/12 tanpa aspek 0 atau keterbatasan hanya berarti **lulus sementara**. Aspek yang tidak dapat diamati ditandai tanpa skor. Transkrip tidak membuktikan pengucapan/kelancaran, dan monolog bukan bukti interaksi spontan.
+
+Jika layanan gagal, status tetap menunggu penilaian—bukan gagal bahasa atau lulus otomatis. Simpan JSON dan unduh file audio asli terpisah. Review manusia dan bukti listening/reading pada bagian sebelumnya tetap diperlukan; aplikasi tidak memverifikasi identitas penilai atau menetapkan CEFR. Status kesiapan provider/deployment aktual tersedia di README; endpoint health hidup saja bukan bukti AI dapat menilai.

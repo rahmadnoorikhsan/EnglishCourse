@@ -1,0 +1,36 @@
+.mastery { min-width: 0; scroll-margin-top: 1.5rem; }
+.mastery h3 { margin-top: 0; font-size: 1.125rem; }
+.mastery h4 { font-size: 1rem; }
+.mastery h5 { margin: 1rem 0 0.5rem; font-size: 0.875rem; }
+.mastery p, .mastery li, .mastery dd { overflow-wrap: anywhere; }
+.mastery-status { padding: 1rem; margin: 1rem 0; border-left: 3px solid var(--color-blue); background: var(--color-soft); }
+.mastery-status > :last-child { margin-bottom: 0; }
+.mastery-connection { margin: 1.5rem 0; padding: 0 1rem; border: 1px solid var(--color-border); border-radius: 10px; }
+.mastery-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--color-border); }
+.mastery-submission { margin: 1.5rem 0; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; }
+.mastery-submission[aria-busy="true"] { border-color: var(--color-blue); }
+.mastery-submission fieldset:disabled { opacity: 0.75; }
+.mastery-task { margin: 0 0 1rem; padding: 1rem; background: var(--color-soft); overflow-wrap: anywhere; }
+.mastery .task-check { align-items: start; margin: 1rem 0; }
+.mastery .task-check input { margin-top: 0.375rem; }
+.mastery [data-mastery-message]:not(:empty) { margin: 1rem 0 0; padding: 0.75rem; border: 1px solid var(--color-border-strong); border-radius: 6px; }
+.mastery-result { margin-top: 1.5rem; padding: 1rem; background: var(--color-soft); border-radius: 10px; }
+.mastery-feedback-list { padding-left: 1.5rem; }
+.mastery-feedback-list > li { margin-bottom: 1rem; }
+.mastery-feedback-list p { margin: 0.5rem 0; }
+.mastery-scores { margin: 1rem 0; }
+.mastery-scores > div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); }
+.mastery-scores dt { min-width: 0; }
+.mastery-scores dd { flex-shrink: 0; margin: 0; font-weight: 650; }
+.mastery-preserve { white-space: normal; }
+.mastery .evidence-list .button { margin: 0.5rem 0.5rem 0.5rem 0; }
+.mastery .evidence-list > li { scroll-margin-top: 1.5rem; }
+@media (max-width: 599px) {
+  .mastery-submission, .mastery-status, .mastery-result, .mastery-task { padding: 0.75rem; }
+  .mastery-scores > div { display: block; }
+  .mastery-scores dd { margin-top: 0.25rem; }
+}
+@media print {
+  .mastery-connection, .mastery-submission { display: none; }
+  .mastery .evidence-list details:not([open]) > *:not(summary) { display: block; }
+}

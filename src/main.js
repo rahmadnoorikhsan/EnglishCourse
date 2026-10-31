@@ -11,6 +11,7 @@ import { mountQuizTracking, saveQuizAttempt } from './quiz-tracking.js';
 import { timeView, timeSummaryView, handleTimeEvent, stopStudyClock } from './study-time.js';
 import { portfolioView, handlePortfolioEvent, disposePortfolio, resetPortfolioAudio } from './portfolio.js';
 import { evaluationView, handleEvaluationEvent } from './evaluation-ui.js';
+import { masteryView, masterySummaryView, handleMasteryEvent, disposeMastery, resetMasteryDrafts } from './mastery-ui.js';
 
 let state = loadState();
 let step = firstUnfinished();
@@ -60,6 +61,7 @@ function render(focus = true, preserveClock = false) {
   if (!preserveClock) stopStudyClock(learningContext());
   main.querySelector('#week-picker[open]')?.close();
   disposePortfolio();
+  disposeMastery();
   const match = readRoute(new URL(location.href));
   const parts = match?.parts || ['not-found'];
   const route = parts[0];
@@ -86,11 +88,12 @@ function render(focus = true, preserveClock = false) {
     const body = main.querySelector('.lesson-content');
     if (step === 2) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', portfolioView(state));
     if (step === 3 || step === 4) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', evaluationView(state));
+    if (step === 3) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', masteryView(state));
     body.querySelector('.lesson-header').insertAdjacentHTML('afterend', timeView(state, step));
     mountQuizTracking(state, main);
   }
   if (route === 'progres') {
-    main.querySelector('.stats-grid').insertAdjacentHTML('afterend', `<div class="page-actions"><a class="action-link" href="${routeHref(`hari-ini/${state.week}/${Math.min(state.day, 6)}/3`)}">Buka portofolio writing & speaking</a></div>` + timeSummaryView(state) + evaluationView(state));
+    main.querySelector('.stats-grid').insertAdjacentHTML('afterend', `<div class="page-actions"><a class="action-link" href="${routeHref(`hari-ini/${state.week}/${Math.min(state.day, 6)}/3`)}">Buka portofolio writing & speaking</a></div>` + masterySummaryView(state) + timeSummaryView(state) + evaluationView(state));
   }
   main.classList.toggle('is-classroom', route === 'hari-ini');
   for (const aside of main.querySelectorAll('aside')) aside.setAttribute('aria-label', 'Navigasi dokumen');
@@ -105,12 +108,13 @@ function render(focus = true, preserveClock = false) {
   if (note) note.value = state.notes[sessionKey(state.week, state.day)] || '';
   showStorageWarning();
   if (focus) { main.focus({ preventScroll: true }); window.scrollTo(0, 0); }
-  if (route === 'panduan' && match.anchor) {
+  if ((route === 'panduan' || route === 'hari-ini') && match?.anchor && !preserveClock) {
     document.getElementById(match.anchor)?.scrollIntoView();
   }
 }
 
-main.addEventListener('change', event => {
+main.addEventListener('change', async event => {
+  if (await handleMasteryEvent(event, learningContext())) return;
   const target = event.target;
   if (target.matches('[data-evaluation-week-select]') && main.classList.contains('is-classroom')) {
     const week = Number(target.value);
@@ -150,7 +154,8 @@ main.addEventListener('change', event => {
     announce('Penanda minggu diperbarui, bukan penilaian CEFR.');
   }
 });
-main.addEventListener('input', event => {
+main.addEventListener('input', async event => {
+  if (await handleMasteryEvent(event, learningContext())) return;
   void handlePortfolioEvent(event, learningContext());
   if (event.target.id === 'session-note') {
     state.notes[sessionKey(state.week, state.day)] = event.target.value;
@@ -166,6 +171,7 @@ main.addEventListener('input', event => {
 main.addEventListener('submit', async event => {
   if (event.target.matches('form[method="dialog"]')) return;
   event.preventDefault();
+  if (await handleMasteryEvent(event, learningContext())) return;
   if (handleTimeEvent(event, learningContext()) || handleEvaluationEvent(event, learningContext())) return;
   if (await handlePortfolioEvent(event, learningContext())) return;
   const form = event.target.closest('[data-quiz]');
@@ -190,6 +196,7 @@ main.addEventListener('submit', async event => {
   }
 });
 main.addEventListener('click', async event => {
+  if (await handleMasteryEvent(event, learningContext())) return;
   if (handleTimeEvent(event, learningContext())) return;
   if (await handlePortfolioEvent(event, learningContext())) return;
   const video = event.target.closest('[data-load-video]');
@@ -218,6 +225,7 @@ main.addEventListener('click', async event => {
     stopStudyClock(learningContext());
     try { await resetPortfolioAudio(); }
     catch { announce('Audio lokal gagal dihapus. Data progres belum dihapus.'); return; }
+    resetMasteryDrafts();
     state = emptyState(); step = 0; persist(); render(false); announce('Progres di browser ini dihapus.');
   }
 });
@@ -238,6 +246,6 @@ window.addEventListener('popstate', () => {
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) stopStudyClock(learningContext());
 });
-window.addEventListener('pagehide', () => { stopStudyClock(learningContext()); disposePortfolio(); });
+window.addEventListener('pagehide', () => { stopStudyClock(learningContext()); disposePortfolio(); disposeMastery(); });
 history.scrollRestoration = 'manual';
 render(false);
