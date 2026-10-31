@@ -58,6 +58,7 @@ function navigateStep(nextStep) {
 }
 function render(focus = true, preserveClock = false) {
   if (!preserveClock) stopStudyClock(learningContext());
+  main.querySelector('#week-picker[open]')?.close();
   disposePortfolio();
   const match = readRoute(new URL(location.href));
   const parts = match?.parts || ['not-found'];
@@ -118,11 +119,7 @@ main.addEventListener('change', event => {
   }
   if (handleEvaluationEvent(event, learningContext())) return;
   void handlePortfolioEvent(event, learningContext());
-  if (target.id === 'week-select' || target.id === 'day-select') {
-    if (target.id === 'week-select') { state.week = Number(target.value); state.day = 1; }
-    else state.day = Number(target.value);
-    persist(); navigateStep(firstUnfinished());
-  } else if (target.id === 'minutes-select') {
+  if (target.id === 'minutes-select') {
     state.minutes = Number(target.value); persist();
     render(false);
     const settings = document.querySelector('.lesson-settings');
@@ -133,7 +130,14 @@ main.addEventListener('change', event => {
     persist();
     const count = checkedBlocks(state);
     main.querySelector('.outline-context progress').value = count;
-    main.querySelector('.outline-context small').textContent = `${count} dari 4 langkah selesai`;
+    main.querySelector('.outline-context > small').textContent = `${count} dari 4 langkah selesai`;
+    const dayLink = main.querySelector('.day-buttons [aria-current]');
+    dayLink.classList.toggle('is-done', count === 4);
+    dayLink.setAttribute('aria-label', `Hari ${state.day}${count === 4 ? ', 4 langkah selesai' : ''}`);
+    dayLink.querySelector('.day-dot')?.remove();
+    if (count === 4) dayLink.insertAdjacentHTML('beforeend', '<span class="day-dot" aria-hidden="true"></span>');
+    const weekCount = Array.from({ length: 6 }, (_, index) => checkedBlocks(state, state.week, index + 1)).reduce((sum, n) => sum + n, 0);
+    main.querySelector('.week-option[aria-current] small').textContent = `Sedang dibuka · ${weekCount}/24 langkah ditandai`;
     const item = main.querySelector(`[data-step="${target.dataset.block}"]`);
     item.querySelector('.step-indicator').textContent = target.checked ? '✓' : Number(target.dataset.block) + 1;
     item.querySelector('small').textContent = `${target.checked ? 'Selesai · ' : ''}${state.minutes / 4} menit`;
@@ -160,6 +164,7 @@ main.addEventListener('input', event => {
   }
 });
 main.addEventListener('submit', async event => {
+  if (event.target.matches('form[method="dialog"]')) return;
   event.preventDefault();
   if (handleTimeEvent(event, learningContext()) || handleEvaluationEvent(event, learningContext())) return;
   if (await handlePortfolioEvent(event, learningContext())) return;
@@ -194,6 +199,11 @@ main.addEventListener('click', async event => {
   const day = event.target.closest('button[data-day]');
   if (day) { state.day = Number(day.dataset.day); persist(); navigateStep(firstUnfinished()); }
   const action = event.target.closest('[data-action]')?.dataset.action;
+  if (action === 'choose-week') {
+    const picker = document.querySelector('#week-picker');
+    picker.showModal();
+    picker.querySelector('[aria-current="true"]')?.scrollIntoView({ block: 'center' });
+  }
   if (action === 'previous-step' && step > 0) navigateStep(step - 1);
   if (action === 'complete-step' && state.day < 7 && step < 4) {
     state.checks[checkKey(state.week, state.day, step)] = true;
@@ -218,6 +228,7 @@ document.addEventListener('click', event => {
   const url = new URL(link.href);
   if (url.origin !== location.origin || !readRoute(url)) return;
   event.preventDefault();
+  if (link.closest('#week-picker')) main.querySelector('#week-picker').close();
   navigate(url.pathname + url.hash);
 });
 window.addEventListener('popstate', () => {
