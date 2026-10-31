@@ -7,6 +7,10 @@ import { loadState, saveState, emptyState, getStorageWarning, sessionKey, checkK
 import { loadVideo } from './material.js';
 import { gradeQuiz } from './quiz.js';
 import { routeHref, readRoute } from './router.js';
+import { mountQuizTracking, saveQuizAttempt } from './quiz-tracking.js';
+import { timeView, timeSummaryView, handleTimeEvent, stopStudyClock } from './study-time.js';
+import { portfolioView, handlePortfolioEvent, disposePortfolio, resetPortfolioAudio } from './portfolio.js';
+import { evaluationView, handleEvaluationEvent } from './evaluation-ui.js';
 
 let state = loadState();
 let step = firstUnfinished();
@@ -26,6 +30,12 @@ function persist() {
   showStorageWarning();
   return saved;
 }
+function refreshLearning() {
+  const scroll = window.scrollY;
+  render(false, true);
+  window.scrollTo(0, scroll);
+}
+const learningContext = () => ({ state, persist, announce, refresh: refreshLearning });
 function showStorageWarning() {
   const element = document.querySelector('#storage-alert');
   element.textContent = getStorageWarning();
@@ -46,7 +56,9 @@ function navigateStep(nextStep) {
     if (outline) outline.open = false;
   }
 }
-function render(focus = true) {
+function render(focus = true, preserveClock = false) {
+  if (!preserveClock) stopStudyClock(learningContext());
+  disposePortfolio();
   const match = readRoute(new URL(location.href));
   const parts = match?.parts || ['not-found'];
   const route = parts[0];
@@ -69,6 +81,16 @@ function render(focus = true) {
   else if (route === 'panduan') main.innerHTML = parts[1] ? reader(parts[1]) : guides();
   else if (route === 'progres') main.innerHTML = progress(state);
   else main.innerHTML = `<div class="empty-state"><h1>Halaman tidak ditemukan</h1><a class="button primary" href="${routeHref('hari-ini')}">Kembali belajar</a></div>`;
+  if (route === 'hari-ini' && state.day !== 7) {
+    const body = main.querySelector('.lesson-content');
+    if (step === 2) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', portfolioView(state));
+    if (step === 3 || step === 4) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', evaluationView(state));
+    body.querySelector('.lesson-header').insertAdjacentHTML('afterend', timeView(state, step));
+    mountQuizTracking(state, main);
+  }
+  if (route === 'progres') {
+    main.querySelector('.stats-grid').insertAdjacentHTML('afterend', `<div class="page-actions"><a class="action-link" href="${routeHref(`hari-ini/${state.week}/${Math.min(state.day, 6)}/3`)}">Buka portofolio writing & speaking</a></div>` + timeSummaryView(state) + evaluationView(state));
+  }
   main.classList.toggle('is-classroom', route === 'hari-ini');
   for (const aside of main.querySelectorAll('aside')) aside.setAttribute('aria-label', 'Navigasi dokumen');
   document.title = `${route === 'hari-ini' ? `Minggu ${state.week} · Hari ${state.day}` : titles[route] || 'Halaman tidak ditemukan'} — EnglishCourse`;
@@ -89,6 +111,13 @@ function render(focus = true) {
 
 main.addEventListener('change', event => {
   const target = event.target;
+  if (target.matches('[data-evaluation-week-select]') && main.classList.contains('is-classroom')) {
+    const week = Number(target.value);
+    if (Number.isInteger(week) && week >= 1 && week <= 26) navigate(routeHref(`hari-ini/${week}/1/${step + 1}`));
+    return;
+  }
+  if (handleEvaluationEvent(event, learningContext())) return;
+  void handlePortfolioEvent(event, learningContext());
   if (target.id === 'week-select' || target.id === 'day-select') {
     if (target.id === 'week-select') { state.week = Number(target.value); state.day = 1; }
     else state.day = Number(target.value);
@@ -118,6 +147,7 @@ main.addEventListener('change', event => {
   }
 });
 main.addEventListener('input', event => {
+  void handlePortfolioEvent(event, learningContext());
   if (event.target.id === 'session-note') {
     state.notes[sessionKey(state.week, state.day)] = event.target.value;
     const saved = persist();
@@ -129,10 +159,12 @@ main.addEventListener('input', event => {
     document.querySelector('#search-results').innerHTML = found.length ? found.map(doc => `<a class="doc-card" href="${routeHref('panduan/' + doc.id)}"><h2>${escapeHtml(doc.title)}</h2><p>${escapeHtml(doc.description)}</p><span>Buka panduan</span></a>`).join('') : '<p class="empty-state" role="status">Tidak ada panduan yang cocok. Coba kata lain.</p>';
   }
 });
-main.addEventListener('submit', event => {
+main.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (handleTimeEvent(event, learningContext()) || handleEvaluationEvent(event, learningContext())) return;
+  if (await handlePortfolioEvent(event, learningContext())) return;
   const form = event.target.closest('[data-quiz]');
   if (!form) return;
-  event.preventDefault();
   const fields = [...form.querySelectorAll('fieldset')];
   const choices = fields.map(field => Number(field.querySelector('input:checked')?.value ?? -1));
   const results = gradeQuiz(state.week, state.day, form.dataset.quiz, choices);
@@ -145,13 +177,21 @@ main.addEventListener('submit', event => {
   });
   const score = results.filter(result => result.correct).length;
   form.querySelector('.quiz-result').textContent = `${score} dari ${results.length} benar. Ini hasil latihan, bukan level CEFR.`;
+  if (saveQuizAttempt(state, form, choices, results)) {
+    const saved = persist();
+    announce(saved ? 'Hasil latihan disimpan ke riwayat.' : 'Hasil belum tersimpan di browser. Ekspor progres.');
+  } else {
+    announce('Riwayat hasil penuh atau data tidak valid. Hasil ini belum dicatat; ekspor arsip sebelum menghapus progres.');
+  }
 });
-main.addEventListener('click', event => {
+main.addEventListener('click', async event => {
+  if (handleTimeEvent(event, learningContext())) return;
+  if (await handlePortfolioEvent(event, learningContext())) return;
   const video = event.target.closest('[data-load-video]');
   if (video) loadVideo(video.dataset.loadVideo, video.closest('[data-video-slot]'));
   const selected = event.target.closest('[data-step]');
   if (selected) navigateStep(Number(selected.dataset.step));
-  const day = event.target.closest('[data-day]');
+  const day = event.target.closest('button[data-day]');
   if (day) { state.day = Number(day.dataset.day); persist(); navigateStep(firstUnfinished()); }
   const action = event.target.closest('[data-action]')?.dataset.action;
   if (action === 'previous-step' && step > 0) navigateStep(step - 1);
@@ -164,7 +204,10 @@ main.addEventListener('click', event => {
   }
   if (action === 'export') { downloadProgress(state); announce('Salinan JSON progres diunduh untuk arsip.'); }
   if (action === 'print') window.print();
-  if (action === 'reset' && window.confirm('Hapus semua checklist dan catatan EnglishCourse di browser ini? Ekspor dahulu jika ingin menyimpan arsip.')) {
+  if (action === 'reset' && window.confirm('Hapus semua progres, portofolio, dan audio lokal EnglishCourse? Ekspor dan unduh audio dahulu.')) {
+    stopStudyClock(learningContext());
+    try { await resetPortfolioAudio(); }
+    catch { announce('Audio lokal gagal dihapus. Data progres belum dihapus.'); return; }
     state = emptyState(); step = 0; persist(); render(false); announce('Progres di browser ini dihapus.');
   }
 });
@@ -181,5 +224,9 @@ window.addEventListener('popstate', () => {
   render();
   if (!location.hash) window.scrollTo(0, history.state?.scrollY || 0);
 });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stopStudyClock(learningContext());
+});
+window.addEventListener('pagehide', () => { stopStudyClock(learningContext()); disposePortfolio(); });
 history.scrollRestoration = 'manual';
 render(false);

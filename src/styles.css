@@ -398,4 +398,49 @@ noscript { display: block; padding: 1rem; background: #fffaeb; color: #93370d; }
   .video-art { width: 45%; top: 12%; right: 10%; opacity: 0.7; }
   .video-caption { position: relative; max-width: 100%; padding: 0.75rem; border-radius: 12px; background: #0b0713e6; }
 }
+
+/* Evidence and practice tools share the classroom's open, responsive layout. */
+.learning-panel { min-width: 0; margin: 1.5rem 0; padding: 1.5rem; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); overflow-wrap: anywhere; }
+.learning-panel > h2:first-child, .learning-panel > div > h2:first-child { margin-top: 0; }
+.learning-panel p { color: var(--color-muted); }
+.learning-panel input:not([type="checkbox"]):not([type="radio"]), .learning-panel select, .learning-panel textarea { width: 100%; min-width: 0; min-height: 44px; padding: 0.625rem 0.75rem; border: 1px solid var(--color-border-strong); border-radius: 8px; background: var(--color-bg); color: var(--color-text); }
+.learning-panel input[type="checkbox"] { accent-color: var(--color-blue); }
+.learning-panel textarea { min-height: 140px; }
+.learning-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); align-items: start; gap: 1rem; }
+.field { display: grid; gap: 0.5rem; min-width: 0; margin-bottom: 1rem; font-size: 0.875rem; }
+.learning-panel label:not(.field):has(textarea), .learning-panel label:not(.field):has(select), .learning-panel label:not(.field):has(input:not([type="checkbox"]):not([type="radio"])) { display: grid; gap: 0.5rem; margin-bottom: 1rem; }
+.learning-panel fieldset { min-width: 0; margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; }
+.learning-panel legend { padding: 0 0.5rem; font-size: 0.875rem; }
+.learning-panel form > button { margin-top: 0.75rem; }
+.learning-panel small, .evidence-list small { display: block; color: var(--color-muted); font-size: 0.75rem; }
+.learning-panel pre { max-width: 100%; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.evidence-list { display: grid; gap: 0.75rem; margin: 1rem 0; padding: 0; list-style: none; }
+.evidence-list > li { min-width: 0; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-bg); overflow-wrap: anywhere; }
+.evidence-list audio { display: block; width: 100%; max-width: 100%; margin: 0.75rem 0; }
+.evidence-list details { margin-top: 0.75rem; }
+.skill-summary { min-width: 0; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; }
+.skill-summary strong { font-size: 1.5rem; }
+.skill-summary p { margin-bottom: 0; font-size: 0.8125rem; }
+.attempt-history { margin: 1rem 0 2rem; }
+.attempt-history h4 { font-size: 0.875rem; }
+.quiz-evidence-settings { margin: 1rem 0; padding: 1rem; border: 1px solid var(--color-border); border-radius: 10px; }
+.study-clock { padding: 1rem; }
+.study-clock h2 { font-size: 0.9375rem; margin-bottom: 0.25rem; }
+.study-clock .muted { margin-top: 0.25rem; }
+.study-clock output { display: block; margin: 0.75rem 0; font-family: ui-monospace, monospace; font-size: 1.5rem; }
+.study-clock .button-row { margin-top: 0.5rem; }
+.learning-panel summary { min-height: 44px; padding: 0.625rem 0; cursor: pointer; }
+.clock-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1.5rem; }
+.clock-controls > div:first-child { margin-right: auto; }
+.clock-controls .field { margin: 0; font-size: 0.75rem; }
+.clock-controls .button-row { margin: 0; }
+.clock-controls output { min-width: 5ch; margin: 0; }
+@media (max-width: 599px) {
+  .learning-panel { padding: 1rem; }
+  .learning-panel .button-row .button { flex: 1 1 100%; }
+}
+@media print {
+  .study-clock, .learning-panel form, .learning-panel button { display: none; }
+  .learning-panel { break-inside: avoid; }
+}
 @media print { .video-library, .listening-material audio { display: none; } }

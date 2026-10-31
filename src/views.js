@@ -38,7 +38,7 @@ export function progress(state) {
   const complete = state.completed.length;
   const totalChecks = Object.values(state.checks).filter(Boolean).length;
   const notes = Object.values(state.notes).filter(note => note.trim()).length;
-  return heading('Progres belajar', 'Catatan aktivitas belajar. Checklist dan penanda mingguan bukan penilaian kemampuan atau level CEFR.') +
+  return heading('Progres belajar', 'Waktu nyata, riwayat percobaan, dan evaluasi empat keterampilan. Checklist tetap catatan aktivitas, bukan level bahasa.') +
     `<div class="stats-grid">
       <div class="stat"><span class="stat-label">Minggu ditandai manual</span><span class="stat-value">${complete}<small> / 26</small></span><progress value="${complete}" max="26" aria-label="Minggu ditandai selesai secara manual"></progress></div>
       <div class="stat"><span class="stat-label">Blok latihan selesai</span><span class="stat-value">${totalChecks}<small> / 624</small></span><span class="stat-detail">Berdasarkan checklist, bukan durasi atau CEFR</span></div>

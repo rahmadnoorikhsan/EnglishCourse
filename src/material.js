@@ -13,7 +13,7 @@ const dayInstructions = [
 ];
 
 function questionSet(questions, id, title) {
-  return `<form class="inline-quiz" data-quiz="${id}"><h3>${title}</h3>${questions.map((q,index)=>`<fieldset><legend>${index+1}. ${esc(q.prompt)}</legend>${q.options.map((option,choice)=>`<label class="quiz-choice"><input type="radio" name="q${index}" value="${choice}" required><span>${esc(option)}</span></label>`).join('')}<p class="quiz-feedback" data-feedback="${index}" hidden></p></fieldset>`).join('')}<button class="button secondary" type="submit">Periksa jawaban</button><p class="quiz-result" role="status" aria-live="polite"></p><small>Nilai sesi ini tidak disimpan setelah pindah langkah. Catat hasil pertama di catatan harian.</small></form>`;
+  return `<form class="inline-quiz" data-quiz="${id}"><h3>${title}</h3>${questions.map((q,index)=>`<fieldset><legend>${index+1}. ${esc(q.prompt)}</legend>${q.options.map((option,choice)=>`<label class="quiz-choice"><input type="radio" name="q${index}" value="${choice}" required><span>${esc(option)}</span></label>`).join('')}<p class="quiz-feedback" data-feedback="${index}" hidden></p></fieldset>`).join('')}<button class="button secondary" type="submit">Periksa & simpan hasil</button><p class="quiz-result" role="status" aria-live="polite"></p><small>Riwayat menyimpan percobaan awal dan ulang secara terpisah. Hasil latihan bukan skor CEFR.</small></form>`;
 }
 
 function passage(value) {

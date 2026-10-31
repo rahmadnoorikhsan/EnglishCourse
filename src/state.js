@@ -1,5 +1,7 @@
+import { emptyLearning, normalizeLearning } from './learning.js';
+
 const KEY = 'englishcourse-progress-v1';
-export const emptyState = () => ({ version: 1, week: 1, day: 1, minutes: 180, checks: {}, notes: {}, completed: [] });
+export const emptyState = () => ({ version: 2, week: 1, day: 1, minutes: 180, checks: {}, notes: {}, completed: [], learning: emptyLearning() });
 let storageWarning = '';
 
 export function loadState() {
@@ -8,7 +10,7 @@ export function loadState() {
     if (!raw) return emptyState();
     const data = JSON.parse(raw);
     const state = emptyState();
-    if (data.version !== 1) throw new Error('Format progres tidak dikenali.');
+    if (![1, 2].includes(data.version)) throw new Error('Format progres tidak dikenali.');
     if (Number.isInteger(data.week) && data.week >= 1 && data.week <= 26) state.week = data.week;
     if (Number.isInteger(data.day) && data.day >= 1 && data.day <= 7) state.day = data.day;
     if ([60, 120, 180, 240].includes(data.minutes)) state.minutes = data.minutes;
@@ -23,6 +25,7 @@ export function loadState() {
       }
     }
     if (Array.isArray(data.completed)) state.completed = [...new Set(data.completed.filter(n => Number.isInteger(n) && n >= 1 && n <= 26))];
+    state.learning = normalizeLearning(data.learning);
     return state;
   } catch {
     storageWarning = 'Progres lama tidak dapat dibaca atau penyimpanan browser dibatasi. Latihan tetap bisa digunakan; ekspor progres sebelum menutup halaman.';
