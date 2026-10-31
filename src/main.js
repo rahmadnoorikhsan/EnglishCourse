@@ -126,7 +126,7 @@ main.addEventListener('input', event => {
   if (event.target.id === 'guide-search') {
     const query = event.target.value.trim().toLocaleLowerCase('id');
     const found = documents.filter(doc => (doc.title + doc.markdown).toLocaleLowerCase('id').includes(query));
-    document.querySelector('#search-results').innerHTML = found.length ? found.map(doc => `<a class="doc-card" href="${routeHref('panduan/' + doc.id)}"><h2>${escapeHtml(doc.title)}</h2><p>${escapeHtml(doc.description)}</p><span>Baca panduan →</span></a>`).join('') : '<p class="empty-state" role="status">Tidak ada panduan yang cocok. Coba kata lain.</p>';
+    document.querySelector('#search-results').innerHTML = found.length ? found.map(doc => `<a class="doc-card" href="${routeHref('panduan/' + doc.id)}"><h2>${escapeHtml(doc.title)}</h2><p>${escapeHtml(doc.description)}</p><span>Buka panduan</span></a>`).join('') : '<p class="empty-state" role="status">Tidak ada panduan yang cocok. Coba kata lain.</p>';
   }
 });
 main.addEventListener('submit', event => {

@@ -10,6 +10,8 @@ Website memakai alur kelas bertahap: **Tonton pelajaran → dengar & baca → bi
 
 Visual terinspirasi Solana: hitam pekat, tipografi besar, tombol pill putih, dan aksen ungu–hijau pada kartu video. Navigasi utama di atas dan area materi/video tetap lebar di laptop. Di HP/tablet, kelas menjadi satu kolom dan **Daftar langkah** bisa dilipat; judul video memiliki panel gelap agar tetap terbaca. Tampilan cetak tetap terang. Tidak ada integrasi wallet atau blockchain.
 
+Navigasi pendukung (silabus, sumber, evaluasi, kembali ke referensi, dan footer) memakai kontrol berbingkai dengan area klik minimal 44 px, bukan link teks kecil bergaris bawah. Link di dalam isi dokumen tetap tampil sebagai tautan bacaan.
+
 Checklist dan catatan lama tetap digunakan. Progres disimpan **hanya di browser/perangkat yang sama**; tidak tersinkron atau terkirim ke GitHub. Ekspor JSON dari Progres untuk arsip. Menghapus data browser akan menghapus progres; jangan masukkan informasi sensitif. JSON adalah arsip, bukan fitur impor kembali. Tombol selesai mencatat aktivitas, bukan nilai atau kelulusan CEFR.
 
 Sumber Markdown di repository tetap menjadi sumber kurikulum/referensi. Paket materi asli di `src/course-*.js` melengkapi kurikulum dengan teks dan soal lokal, bukan salinan pelajaran pihak ketiga. Draft ditulis di catatan harian (maksimal 5.000 karakter, dipakai bersama antar-langkah); rekaman berbicara dikelola sendiri dengan alat rekam perangkat. Website tidak merekam atau mengunggah audio pengguna.
