@@ -3,8 +3,8 @@ import { markdown, escapeHtml as esc } from './markdown.js';
 import { checkedBlocks, checkKey } from './state.js';
 import { material } from './material.js';
 
-const names = ['Pahami polanya', 'Dengar & baca', 'Bicara & tulis', 'Ulangi & evaluasi'];
-const types = ['Penjelasan & latihan', 'Listening & reading', 'Speaking & writing', 'Review & catatan'];
+const names = ['Tonton video asli', 'Latihan dengar & baca', 'Bicara & tulis', 'Ulangi & evaluasi'];
+const types = ['Video engVid & pendamping', 'Latihan tambahan EnglishCourse', 'Speaking & writing', 'Review & catatan'];
 
 
 export function lesson(state, step, outlineOpen) {

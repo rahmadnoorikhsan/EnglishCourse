@@ -4,7 +4,7 @@ Ini **urutan latihan adaptif**, bukan jadwal kelulusan CEFR. Minggu dihitung sej
 
 Kode E/L/R/G/B/V/S menunjuk [05-SUMBER.md](05-SUMBER.md). Semua hasil mingguan disimpan sendiri; tidak ada nilai contoh yang boleh diklaim sebagai hasilmu. Panjang/durasi di bawah adalah **sasaran latihan**, boleh diperkecil jika pesan belum tersampaikan.
 
-**Jika belajar melalui website:** setiap minggu memiliki paket lokal asli (penjelasan Indonesia, contoh, bacaan, audio sintetis, kuis, dan tugas output). Hari 1–5 mengulang paket latihan dengan variasi tugas; hari 6 menampilkan paket bacaan/audio berbeda. Kode sumber pada tabel menjadi pengayaan opsional, bukan kewajiban keluar dari kelas. Tabel hari pertama di bawah adalah jalur sumber eksternal; kelas lokal memakai teks dan kuis berbeda, bukan salinan VOA/British Council. Hasil kuis lokal tidak menggantikan rubrik, penilaian manusia, atau asesmen resmi. Jika paket hari 6 sudah pernah dibuka, catat sebagai latihan ulang, bukan input baru.
+**Jika belajar melalui website:** mulai dengan video pengajaran asli engVid pada langkah pertama. Minggu tanpa video baru menyediakan pustaka review, bukan video khusus yang dikarang. Penjelasan Indonesia, bacaan, audio sintetis, dan kuis lokal adalah latihan tambahan buatan EnglishCourse, bukan pengganti atau materi resmi engVid/British Council/VOA. Hari 1–5 mengulang paket latihan lokal; hari 6 memakai bacaan/audio berbeda. Hasil kuis lokal tidak menggantikan rubrik, penilaian manusia, atau asesmen resmi. Jika paket hari 6 sudah pernah dibuka, catat sebagai latihan ulang, bukan input baru.
 
 ## Cara membaca jadwal
 

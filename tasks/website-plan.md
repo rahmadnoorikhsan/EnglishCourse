@@ -67,3 +67,11 @@ Verifikasi lokal pada build produksi:
 - Sebelum klik, iframe video tidak ada. Sesudah klik, iframe YouTube resmi dimuat; E01 menampilkan “This video is unavailable” di browser verifikasi. ID cocok dengan halaman resmi engVid. Keberhasilan playback video tidak diklaim; teks, audio lokal, dan kuis tetap dapat digunakan tanpa player.
 
 Catatan keterbatasan: paket hari 6 yang pernah dibuka bukan input baru saat pengulangan; nilai kuis tidak disimpan setelah navigasi, hanya draft/checklist/catatan. Audio dibuat dengan eSpeak NG, bukan penutur asli atau asesmen terstandar. Rollback tetap revert commit dan deploy ulang; format localStorage tidak berubah.
+
+## Koreksi: video sumber didahulukan
+
+Pengguna mengoreksi bahwa materi buatan asisten tidak boleh menggantikan video sumber. Langkah pertama kini bernama **Tonton video asli**: judul dan tombol player engVid tampil sebelum latihan apa pun, tanpa disclosure yang menyembunyikan video. Penjelasan dan kuis EnglishCourse dipindahkan ke bagian tambahan terlipat dengan label bukan materi/kuis resmi engVid. Langkah lain juga dilabeli sebagai latihan pendamping. Minggu tanpa video baru menampilkan pustaka review 12 video, dengan penjelasan bahwa itu bukan video baru khusus minggu tersebut. Kuis resmi tetap ditautkan ke sumber; tidak disalin atau diberi label seolah kuis lokal resmi.
+
+Koreksi bukti pemutar: E01 berhasil diputar pada domain Pages publik; video Ronnie berdurasi 10:12, `paused: false`, waktu bergerak. Kegagalan sebelumnya pada preview localhost tidak membuktikan video sumber tidak tersedia. Preview lokal pada pemeriksaan koreksi masih menunjukkan unavailable; player publik yang dijalankan berhasil. Tidak ada klaim semua 12 video sudah ditonton atau diuji playback-nya.
+
+Check JavaScript, 3 tes kuis, dan build berhasil. Screenshot desktop/mobile diperiksa; pada 375 px tidak overflow, video terlihat dan tambahan terlipat. Pustaka minggu 9 memuat 12 pilihan; kuis tambahan minggu 1 tetap memberi 2/2 untuk jawaban benar. Tidak ada error JavaScript aplikasi pada skenario koreksi.
