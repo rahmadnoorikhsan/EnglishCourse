@@ -1,28 +1,23 @@
-import { mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, copyFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { course } from '../src/course.js';
 
-// Rebuild only when original listening scripts change. Requires espeak-ng + ffmpeg.
-// eSpeak NG generates synthetic speech, not recordings of a human speaker.
-await mkdir('public/audio', { recursive: true });
+// Neural speech is prebuilt: the website never loads a model or calls a TTS API.
+if (!process.env.KOKORO_MODEL_DIR) throw new Error('Set KOKORO_MODEL_DIR to the directory containing kokoro-v1.0.onnx and voices-v1.0.bin.');
+const jobs = course.flatMap(item => ['practice', 'assessment'].map(kind => ({
+  week: item.week,
+  name: `w${String(item.week).padStart(2, '0')}-${kind}`,
+  text: (kind === 'practice' ? item : item.assessment).listening.text,
+})));
 const temp = await mkdtemp(join(tmpdir(), 'englishcourse-audio-'));
-function run(binary, args, input) {
-  const result = spawnSync(binary, args, { input, encoding: 'utf8' });
-  if (result.error) throw result.error;
-  if (result.status !== 0) throw new Error(`${binary}: ${result.stderr}`);
-}
 try {
-  for (const item of course) {
-    for (const [kind, text] of [['practice', item.listening.text], ['assessment', item.assessment.listening.text]]) {
-      const name = `w${String(item.week).padStart(2, '0')}-${kind}`;
-      const wav = join(temp, `${name}.wav`);
-      run('espeak-ng', ['-v', 'en-us', '-s', item.week < 5 ? '125' : item.week < 14 ? '145' : '160', '-w', wav, '--stdin'], text);
-      run('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-y', '-i', wav, '-codec:a', 'libmp3lame', '-b:a', '48k', `public/audio/${name}.mp3`]);
-      console.log(name);
-    }
-  }
+  const result = spawnSync('uv', ['run', '--no-project', '--python', '3.12', '--with', 'kokoro-onnx==0.6.1', '--with', 'soundfile==0.13.1', 'scripts/synthesize-audio.py', temp], { input: JSON.stringify(jobs), encoding: 'utf8', stdio: ['pipe', 'inherit', 'inherit'] });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error('Neural audio generation failed; existing audio was not replaced.');
+  await mkdir('public/audio', { recursive: true });
+  for (const job of jobs) await copyFile(join(temp, `${job.name}.mp3`), `public/audio/${job.name}.mp3`);
 } finally {
   await rm(temp, { recursive: true, force: true });
 }

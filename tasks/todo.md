@@ -25,3 +25,10 @@ Checklist ini untuk pengerjaan dokumen, bukan daftar tugas belajar harian.
 - [x] Browser desktop diperiksa pada ukuran screenshot pengguna 1905×978; breakpoint 320, 390, 768, 1024, 1280, dan 1568 px tidak overflow horizontal dan seluruh kontrol timer berada di dalam panel.
 - [x] Timer mulai → 00:02 → jeda menyimpan dua detik; form manual terbuka dan iframe video termuat. Halaman input/output/review/progres diperiksa pada 390 dan 1024 px tanpa overflow; tidak ada error JavaScript aplikasi yang tertangkap.
 - [x] Build produksi berhasil; peringatan bundle JS >500 kB tetap ada. Perubahan hanya CSS, tidak mengubah penyimpanan progres, penilaian, atau backend.
+
+## Penggantian suara latihan — 31 Oktober 2026
+
+- [x] Seluruh 52 MP3 diganti dari eSpeak NG ke Kokoro v1.0, suara American English `af_heart`; naskah, soal, dan tugas tidak diubah. Kecepatan 0,85× minggu 1–4, 0,93× minggu 5–13, dan 1× minggu 14–26.
+- [x] Hash 52 file berubah; seluruh MP3 lolos dekode penuh ffmpeg tanpa error, mono 24 kHz, durasi 19,94–59,77 detik. SHA256 model dan voices cocok dengan rilis resmi. Uji model tidak ditemukan gagal dengan jelas dan mempertahankan hash seluruh 52 audio lama.
+- [x] Browser halaman input minggu 1 memutar MP3 baru: durasi 21,43 detik, waktu melewati satu detik, `paused: false`, transkrip tetap tertutup. Label menjelaskan suara AI neural, bukan rekaman manusia atau asesmen terstandar. URL versi baru mencegah pemakaian cache audio lama.
+- [x] `npm run check`, 50 tes, validator 26 paket/52 audio, dan build produksi lulus; audit npm menemukan 0 vulnerabilities. Peringatan bundle JS >500 kB tetap ada. Pemeriksaan dekode/playback bukan penilaian manusia atas naturalness atau ketepatan setiap pelafalan.
