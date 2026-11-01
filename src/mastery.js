@@ -52,9 +52,10 @@ export function normalizeAssessment(input) {
   });
 }
 
-/** Identity is stage-specific: weekly work cannot satisfy a phase checkpoint. */
-export function masteryTaskId(week, kind, stage = 'weekly') {
-  if (!weekValid(week) || !['writing', 'speaking'].includes(kind) || !['weekly', 'phase'].includes(stage)) return null;
+/** Practice is day-specific and cannot satisfy weekly or phase checkpoints. */
+export function masteryTaskId(week, kind, stage = 'weekly', day) {
+  if (!weekValid(week) || !['writing', 'speaking'].includes(kind) || !['weekly', 'phase', 'practice'].includes(stage)) return null;
+  if (stage === 'practice') return kind === 'speaking' && integer(day, 1, 6) ? `w${week}-d${day}-practice-speaking` : null;
   if (stage === 'phase' && !PHASE_WEEKS.has(week)) return null;
   return `w${week}-${stage}-${kind}`;
 }
@@ -92,7 +93,7 @@ function normalizeCheck(input) {
 function normalizeSubmission(input) {
   if (!object(input)) return null;
   const meta = identity(input);
-  const taskId = masteryTaskId(input.week, input.kind, input.stage);
+  const taskId = masteryTaskId(input.week, input.kind, input.stage, input.day);
   if (!meta || !taskId || input.taskId !== taskId || !textValid(input.text)) return null;
   if (input.parentId !== null && (typeof input.parentId !== 'string' || !UUID.test(input.parentId))) return null;
   if (input.audioId !== null && (typeof input.audioId !== 'string' || !UUID.test(input.audioId))) return null;
@@ -102,6 +103,7 @@ function normalizeSubmission(input) {
   if (input.kind === 'speaking' && !input.audioId && !input.text.trim()) return null;
   return {
     ...meta, week: input.week, kind: input.kind, stage: input.stage, taskId,
+    ...(input.stage === 'practice' ? { day: input.day } : {}),
     parentId: input.parentId, sourceId, text: input.text, audioId: input.audioId,
     assessment: normalizeAssessment(input.assessment), independent: input.independent === true && input.parentId === null,
   };
@@ -221,7 +223,7 @@ function stageSummary(submissions, stage, required) {
 export function masteryStatus(state, week) {
   const evidence = normalizeMastery(state?.mastery);
   const checks = evidence.checks.filter(row => row.week === week);
-  const submissions = evidence.submissions.filter(row => row.week === week);
+  const submissions = evidence.submissions.filter(row => row.week === week && row.stage !== 'practice');
   const currentCheck = latest(checks);
   const weekly = stageSummary(submissions, 'weekly', true);
   const phase = stageSummary(submissions, 'phase', PHASE_WEEKS.has(week));

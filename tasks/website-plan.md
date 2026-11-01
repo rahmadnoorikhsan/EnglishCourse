@@ -142,3 +142,33 @@ Verifikasi:
 - Review independen server menemukan dan memperbaiki admission race, timeout socket, pesan parse provider yang bisa membocorkan excerpt, serta timeout frontend180s yang lebih pendek dari rantai provider210s. Timeout klien menjadi240s; regresi malformed-response tidak membocorkan isi provider.
 
 Batas keras: model teks 9router yang diuji ditolak upstream `model_not_found`; provider audio `whisper-1` menjawab tidak ada kredensial OpenAI. Provider alternatif lokal yang diuji403. Tidak ada feedback AI sukses yang terverifikasi. Jalur sukses AI, kualitas feedback, dan kelulusan berbasis audio belum dinyatakan siap. Endpoint health hanya membuktikan proses hidup. Provider harus diperbaiki sebelum integrasi penilaian dapat dianggap selesai.
+
+## Perbaikan provider: 9router komputer lokal
+
+Atas pilihan pengguna, router lokal diperbarui dari 0.5.55 ke paket resmi 0.5.112 setelah backup runtime/state. Model `cx/codex-auto-review` kini menghasilkan koreksi nyata HTTP 200; `cx/transcribe` menghasilkan transkrip audio nyata dengan akun OAuth yang sama. Router VPS/cold-calling tidak dipatch atau direstart.
+
+Backend EnglishCourse memakai Unix socket reverse SSH ke router lokal melalui akun khusus yang disetujui pengguna, kunci terpisah, tanpa shell, dan tanpa listener TCP (`PermitListen none`, diuji menolak port 20991). Socket 660, direktori 750, mount read-only; container assessment memakai grup socket tambahan dan tidak lagi bergabung ke jaringan router VPS. Unit user lokal melakukan reconnect otomatis. Komputer lokal harus menyala dan online.
+
+Bukti website publik `/EnglishCourse/belajar/1/1/review/`: tulisan salah mendapat feedback spesifik dan 2/12; setelah instruksi rubrik dipisahkan dari batas speaking, tulisan sesuai tugas mendapat 12/12 lulus sementara, tanpa klaim mandiri/manusia. MP3 fixture sintetis diunggah lewat form, ditranskripsikan, lalu menerima feedback nyata; aspek keterpahaman serta kelancaran/interaksi tetap tidak dapat dinilai dan tidak lulus. Teks, feedback, transkrip, serta referensi audio bertahan reload; screenshot riwayat audio diperiksa. Fixture bukan hasil belajar pengguna. Tab pengujian ditutup.
+
+Verifikasi: 50 tes lulus; `npm run check` dan audit dependency lulus (0 vulnerability). Setelah koreksi prompt terakhir, enam tes backend/transport lulus dan build berhasil. Peringatan bundle lebih dari 500 kB tetap ada. Backend terpasang dan direstart hanya container `englishcourse-assessment-1`; tidak memerlukan perubahan frontend atau restart Caddy. Panduan operasional, konfigurasi SSH, unit tunnel, model, dan batas speaking diperbarui di README/server.
+
+## Cutover Gemini ke VPS — selesai 31 Oktober 2026
+
+Menggantikan ketergantungan laptop pada catatan sebelumnya: backend sekarang memakai router khusus project `englishcourse-router`, network `englishcourse_router`, model teks/audio `ag/gemini-3-flash`, tanpa port host router. Satu koneksi Google/Antigravity yang sudah tersedia dipindahkan dengan persetujuan pengguna; koneksi sumber dinonaktifkan agar tidak melakukan refresh paralel. Ini bukan akun atau kuota Google baru. Router Sherpa/cold-calling tidak dimodifikasi.
+
+Uji browser website publik setelah tunnel dimatikan: tulisan sesuai tugas menerima 12/12 lulus sementara AI, MP3 fixture menerima feedback perlu revisi, dan keduanya bertahan reload. Transkripsi awal sempat menyalin catatan unggahan; diperbaiki dengan tahap transkripsi audio terisolasi tanpa catatan/tugas, diikuti penilaian transkrip. Transkrip akhir berisi percakapan fixture yang benar, bukan catatan pengguna. Keterpahaman dan kelancaran/interaksi tetap null; fixture bukan bukti kemampuan siswa. Screenshot feedback akhir diperiksa dan tab ditutup.
+
+Jalur socket, tes transport, konfigurasi/unit tunnel proyek, dan unit lokal dihapus; akun tunnel VPS dibuat kedaluwarsa, authorized key/socket dihapus. `.env` VPS tidak lagi memuat `ROUTER_SOCKET`/`TRANSCRIPTION_MODEL`. README memuat deployment, model, isolasi jaringan, batas audio, dan ketergantungan OAuth terbaru. Restart cutover hanya mengenai container EnglishCourse; layanan lain tidak direstart pada tahap ini.
+
+Verifikasi akhir: `npm run check` lulus; `npm test` 50/50 lulus, termasuk isolasi catatan dari transkripsi, larangan penggantian transkrip oleh grader, dan penolakan transkrip kosong; `npm run check:course` memvalidasi 26 paket/52 audio; `npm run build` lulus dengan peringatan bundle JS 558,67 kB (>500 kB) yang tetap terlihat. Bukti runtime terakhir memakai backend final di VPS, bukan mock. OAuth/kuota provider tetap dapat gagal; tidak ada janji layanan tanpa gangguan.
+
+## Mikrofon langkah 3 dan koreksi grammar harian
+
+Panel Bicara & tulis hari 1–6 memakai MediaRecorder dengan izin setelah klik, pemilihan WebM/Ogg/MP4, timer maksimal 5 menit, batas 10 MiB, playback, unduhan, dan draft audio IndexedDB per minggu/hari. Dispose/cancel melepaskan tracks termasuk izin terlambat; gagal rekam ulang mempertahankan preview lama. Audio tidak dikirim otomatis.
+
+Kontrak `practice` speaking memerlukan hari 1–6 dan prompt kanonis course. Riwayat/revisi/feedback terpisah dari bukti mingguan/fase dan tidak memenuhi mastery gate. Backend VPS dipasang dengan modul course dan hanya assessment direstart; ingress/router layanan lain tidak direstart.
+
+Smoke Chromium memakai fixture ujaran sintetis lewat perangkat mikrofon virtual (bukan suara/pencapaian pengguna): rekam 12 detik, stop, playback berjalan, draft bertahan reload. Form frontend mengirim ke backend Gemini nyata melalui jembatan origin pengujian lokal; feedback Indonesia mengoreksi “I is” → “I am” dan “I lives” → “I live”. Feedback bertahan reload; revisi tidak memuat audio lama otomatis. Perpindahan halaman saat merekam membatalkan take; hari 2 tidak menerima draft hari 1. Layout HP 390 px tanpa overflow horizontal. Satu panggilan awal ditolak karena JSON provider tidak valid; diagnosis terisolasi dan panggilan form berikutnya berhasil. Tidak ada fallback kelulusan, parser longgar, atau retry otomatis ditambahkan. Transkripsi nama/tempat dapat salah; pronunciation/kelancaran tetap null.
+
+Verifikasi akhir: 81 tes lulus setelah menghapus tes markup/wording; check, audit dependency (0 vulnerabilities), dan build lulus. Validator memeriksa 26 paket/52 audio. Pengujian lifecycle, batas, asal bukti, dan isolasi gate tetap ada. Peringatan bundle >500 kB tetap terlihat (568,34 kB sebelum gzip).

@@ -6,3 +6,6 @@ dist/
 *.key
 .DS_Store
 *.local
+router.env
+router-data/
+router-home/

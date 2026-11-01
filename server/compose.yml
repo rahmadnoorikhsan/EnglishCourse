@@ -26,4 +26,4 @@ networks:
     name: cold-calling_default
   router:
     external: true
-    name: cold-calling_nine-router-egress
+    name: englishcourse_router

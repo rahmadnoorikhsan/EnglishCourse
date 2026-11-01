@@ -264,3 +264,86 @@ test('AI timestamps may precede browser drafts without losing assessment or revi
   assert.equal(status.revisionCount, 1);
   assert.deepEqual(normalizeMastery(JSON.parse(JSON.stringify(normalized))), normalized);
 });
+
+const practice = (week = 1, day = 1, n = 2, overrides = {}) => submission(week, 'speaking', 'practice', n, {
+  day, taskId: masteryTaskId(week, 'speaking', 'practice', day), ...overrides,
+});
+
+test('practice identities require speaking and an integer day from 1 through 6', () => {
+  for (let week = 1; week <= 26; week++) {
+    for (let day = 1; day <= 6; day++) {
+      assert.equal(masteryTaskId(week, 'speaking', 'practice', day), `w${week}-d${day}-practice-speaking`);
+      const row = practice(week, day);
+      assert.equal(normalizeMastery({ submissions: [row] }).submissions[0].day, day);
+    }
+  }
+  for (const day of [undefined, null, 0, 7, -1, 1.5, '1', true, NaN, Infinity]) {
+    assert.equal(masteryTaskId(1, 'speaking', 'practice', day), null);
+    assert.equal(normalizeMastery({ submissions: [practice(1, 1, 2, { day })] }).submissions.length, 0);
+  }
+  for (const week of [0, 27, '1']) assert.equal(masteryTaskId(week, 'speaking', 'practice', 1), null);
+  assert.equal(masteryTaskId(1, 'writing', 'practice', 1), null);
+  assert.equal(masteryTaskId(1, 'speaking', 'weekly'), 'w1-weekly-speaking');
+  assert.equal(masteryTaskId(4, 'speaking', 'phase'), 'w4-phase-speaking');
+  for (const overrides of [{ kind: 'writing', text: 'Writing cannot become practice.' }, { taskId: 'w1-practice-speaking' }, { taskId: 'w1-d2-practice-speaking' }]) {
+    assert.equal(normalizeMastery({ submissions: [practice(1, 1, 2, overrides)] }).submissions.length, 0);
+  }
+});
+
+test('practice day and immutable source survive assessment retries, revisions and JSON roundtrips', () => {
+  const pending = practice(1, 3, 2, { text: 'My original note.\nDo not replace it.', assessment: null });
+  const feedback = { ...pending, id: id(3), createdAt: date(3), sourceId: pending.id, assessment: assessment({ status: 'needs_revision' }) };
+  const retry = { ...feedback, id: id(4), createdAt: date(4), assessment: assessment() };
+  const revision = practice(1, 3, 5, { parentId: retry.id, assessment: null });
+  const anotherDay = practice(1, 4, 6);
+  const normalized = normalizeMastery({ submissions: [pending, feedback, retry, revision, anotherDay] });
+  assert.deepEqual(normalized.submissions.map(row => row.day), [3, 3, 3, 3, 4]);
+  assert.deepEqual(normalized.submissions.map(row => row.independent), [true, true, true, false, true]);
+  assert.equal(normalized.submissions[0].text, pending.text);
+  assert.equal(normalized.submissions[0].assessment, null);
+  assert.equal(normalized.submissions[1].assessment.feedback, feedback.assessment.feedback);
+  assert.equal(normalized.submissions[2].sourceId, pending.id);
+  assert.equal(normalized.submissions[3].parentId, retry.id);
+  assert.throws(() => { normalized.submissions[0].day = 4; }, TypeError);
+  assert.deepEqual(normalizeMastery(JSON.parse(JSON.stringify(normalized))), normalized);
+  for (const changed of [
+    { ...feedback, day: 4, taskId: masteryTaskId(1, 'speaking', 'practice', 4) },
+    { ...feedback, stage: 'weekly', taskId: masteryTaskId(1, 'speaking', 'weekly') },
+    { ...revision, day: 4, taskId: masteryTaskId(1, 'speaking', 'practice', 4) },
+    { ...revision, stage: 'weekly', taskId: masteryTaskId(1, 'speaking', 'weekly') },
+  ]) {
+    assert.deepEqual(normalizeMastery({ submissions: [pending, feedback, retry, { ...changed, id: id(8) }] }).submissions.map(row => row.id), [pending.id, feedback.id, retry.id]);
+  }
+});
+
+test('practice never satisfies weekly, phase or reported-human mastery gates', () => {
+  for (const week of [1, 4, 8, 12, 16, 20, 24, 26]) {
+    const rows = Array.from({ length: 6 }, (_, index) => practice(week, index + 1, index + 4));
+    const onlyPractice = { submissions: rows, humanReviews: rows.map((row, index) => review(row, index + 20)) };
+    const normalized = normalizeMastery(onlyPractice);
+    assert.equal(normalized.submissions.length, 6);
+    assert.equal(normalized.humanReviews.length, 0);
+    assert.equal(masteryStatus({ mastery: normalized }, week).status, 'not_started');
+    const state = ready(week);
+    state.submissions = [state.submissions[0], ...rows];
+    state.humanReviews = rows.flatMap((row, index) => [review(row, index + 20, { stage: 'weekly' }), review(row, index + 30, { stage: 'phase' })]);
+    let status = masteryStatus({ mastery: state }, week);
+    assert.equal(status.weekly.speaking, null);
+    assert.equal(status.weekly.passed, false);
+    assert.equal(status.phase.speaking, null);
+    assert.equal(status.provisionalPass, false);
+    assert.equal(status.humanVerified, false);
+    assert.equal(status.submissionCount, 1);
+    assert.equal(status.independentSubmissionCount, 1);
+    state.submissions.push(submission(week, 'speaking', 'weekly', 10));
+    if (status.phase.required) state.submissions.push(submission(week, 'writing', 'phase', 11), submission(week, 'speaking', 'phase', 12));
+    status = masteryStatus({ mastery: state }, week);
+    assert.equal(status.provisionalPass, true);
+    assert.equal(status.humanVerified, false);
+    assert.equal(normalizeMastery(state).humanReviews.length, 0);
+    state.humanReviews = state.submissions.filter(row => row.stage !== 'practice').map((row, index) => review(row, index + 40));
+    assert.equal(masteryStatus({ mastery: state }, week).humanVerified, true);
+    state.submissions.push(practice(week, 6, 15, { assessment: assessment({ status: 'needs_revision' }) }));
+    assert.equal(masteryStatus({ mastery: state }, week).status, 'human_verified');
+  }
+});

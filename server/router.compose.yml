@@ -1,0 +1,36 @@
+services:
+  router:
+    image: decolua/9router:0.5.112@sha256:ae94cb5b37e1852343d7cdbe3bd0bdf13cb400a7fcf08c59ca50fb11876b879f
+    init: true
+    entrypoint: []
+    command: [node, custom-server.js]
+    user: "1000:1000"
+    env_file: router.env
+    environment:
+      DATA_DIR: /app/data
+      HOME: /app/data-home
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: "20128"
+      HOSTNAME: 0.0.0.0
+    volumes:
+      - ./router-data:/app/data
+      - ./router-home:/app/data-home
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 768m
+    cpus: 0.5
+    pids_limit: 128
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "2"
+    networks: [router]
+networks:
+  router:
+    name: englishcourse_router

@@ -11,7 +11,7 @@ import { mountQuizTracking, saveQuizAttempt } from './quiz-tracking.js';
 import { timeView, timeSummaryView, handleTimeEvent, stopStudyClock } from './study-time.js';
 import { portfolioView, handlePortfolioEvent, disposePortfolio, resetPortfolioAudio } from './portfolio.js';
 import { evaluationView, handleEvaluationEvent } from './evaluation-ui.js';
-import { masteryView, masterySummaryView, handleMasteryEvent, disposeMastery, resetMasteryDrafts } from './mastery-ui.js';
+import { masteryView, masterySummaryView, speakingPracticeView, mountSpeakingRecorder, handleMasteryEvent, disposeMastery, resetMasteryDrafts } from './mastery-ui.js';
 
 let state = loadState();
 let step = firstUnfinished();
@@ -86,7 +86,10 @@ function render(focus = true, preserveClock = false) {
   else main.innerHTML = `<div class="empty-state"><h1>Halaman tidak ditemukan</h1><a class="button primary" href="${routeHref('hari-ini')}">Kembali belajar</a></div>`;
   if (route === 'hari-ini' && state.day !== 7) {
     const body = main.querySelector('.lesson-content');
-    if (step === 2) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', portfolioView(state));
+    if (step === 2) {
+      body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', speakingPracticeView(state) + portfolioView(state));
+      void mountSpeakingRecorder(main, learningContext());
+    }
     if (step === 3 || step === 4) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', evaluationView(state));
     if (step === 3) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', masteryView(state));
     body.querySelector('.lesson-header').insertAdjacentHTML('afterend', timeView(state, step));

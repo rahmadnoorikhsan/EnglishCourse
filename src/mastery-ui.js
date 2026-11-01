@@ -4,6 +4,8 @@ import { routeHref } from './router.js';
 import { masteryTasks } from './mastery-content.js';
 import { normalizeMastery, gradeUnderstanding, masteryStatus, masteryTaskId, normalizeAssessment } from './mastery.js';
 import { putAudio, readAudio, deleteAudio } from './audio-store.js';
+import { course } from './course.js';
+import { recorderView, mountRecorder } from './recorder.js';
 
 const DEFAULT_API = 'https://englishcourse.43-133-141-109.sslip.io';
 const CONNECTION_KEY = 'englishcourse-mastery-connection';
@@ -20,13 +22,15 @@ const aspects = {
   speaking: ['Tugas dan pesan', 'Keterpahaman', 'Kelancaran dan interaksi', 'Kendali bahasa'],
 };
 let activeAudioUrl = null;
-const keyOf = (week, kind, stage) => `${week}-${stage}-${kind}`;
+let recorderDisposers = [];
+let recorderGeneration = 0;
+const keyOf = (week, kind, stage, day) => `${week}-${stage}-${kind}${stage === 'practice' ? `-${day}` : ''}`;
 const taskFor = week => masteryTasks.find(task => task.week === Number(week));
 const dateLabel = value => new Date(value).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 const lines = value => esc(value ?? '').replace(/\r?\n/g, '<br>');
 const newId = () => crypto.randomUUID();
 const kindLabel = kind => kind === 'writing' ? 'Tulisan' : 'Rekaman berbicara';
-const stageLabel = stage => stage === 'phase' ? 'Checkpoint fase' : 'Mingguan';
+const stageLabel = stage => stage === 'phase' ? 'Checkpoint fase' : stage === 'practice' ? 'Latihan harian · koreksi grammar' : 'Mingguan';
 
 function connection() {
   try {
@@ -44,8 +48,8 @@ function apiUrl(raw) {
   return url.origin;
 }
 
-function draftFor(week, kind, stage) {
-  const key = keyOf(week, kind, stage);
+function draftFor(week, kind, stage, day) {
+  const key = keyOf(week, kind, stage, day);
   if (!drafts.has(key)) drafts.set(key, { text: '', parentId: '', sourceId: null, independent: false, consent: false, file: null, pending: null, message: '' });
   return drafts.get(key);
 }
@@ -101,17 +105,18 @@ function understandingView(mastery, task) {
   </section>`;
 }
 
-function submissionForm(mastery, task, kind, stage) {
-  const key = keyOf(task.week, kind, stage);
-  const draft = draftFor(task.week, kind, stage);
-  const parents = mastery.submissions.filter(row => row.week === task.week && row.kind === kind && row.stage === stage);
-  const prompt = stage === 'phase' ? task.phaseTask : task[`${kind}Task`];
-  return `<form class="mastery-submission" data-mastery-submit data-week="${task.week}" data-kind="${kind}" data-stage="${stage}" aria-busy="${busy.has(key)}">
-    <h4>${esc(kindLabel(kind))} · ${esc(stageLabel(stage))}</h4><div class="mastery-task">${lines(prompt)}</div>
+function submissionForm(mastery, task, kind, stage, day) {
+  const key = keyOf(task.week, kind, stage, day);
+  const draft = draftFor(task.week, kind, stage, day);
+  const parents = mastery.submissions.filter(row => row.week === task.week && row.kind === kind && row.stage === stage && (stage !== 'practice' || row.day === day));
+  const prompt = stage === 'phase' ? task.phaseTask : stage === 'practice' ? course[task.week - 1].output.speaking : task[`${kind}Task`];
+  return `<form class="mastery-submission" data-mastery-submit data-week="${task.week}" data-kind="${kind}" data-stage="${stage}"${stage === 'practice' ? ` data-day="${day}"` : ''} aria-busy="${busy.has(key)}">
+    <h4>${esc(kindLabel(kind))} · ${esc(stageLabel(stage))}${stage === 'practice' ? ` · Hari ${day}` : ''}</h4><div class="mastery-task">${lines(prompt)}</div>
     <fieldset${busy.has(key) || draft.pending ? ' disabled' : ''}><legend>${draft.parentId ? 'Revisi karya terdahulu' : 'Karya baru'}</legend>
     <label class="field">Hubungan dengan karya sebelumnya<select name="parentId"><option value="">Draft baru, bukan revisi</option>${parents.map(row => `<option value="${esc(row.id)}"${draft.parentId === row.id ? ' selected' : ''}>Revisi ${esc(dateLabel(row.createdAt))} · ${esc(row.id)}</option>`).join('')}</select></label>
-    <p>Memilih revisi menyalin teks lama sebagai titik awal; rekaman revisi harus diunggah ulang. Kiriman lama dan feedback tidak akan ditimpa.</p>
+    <p>Memilih revisi menyalin teks lama sebagai titik awal; ${stage === 'practice' ? 'rekam ulang atau unggah audio baru' : 'rekaman revisi harus diunggah ulang'}. Kiriman lama dan feedback tidak akan ditimpa.</p>
     <label class="field">${kind === 'writing' ? 'Teks karya (wajib)' : 'Catatan rekaman / konteks interaksi (bukan pengganti audio)'}<textarea name="text" rows="${kind === 'writing' ? 8 : 4}" maxlength="20000"${kind === 'writing' ? ' required' : ''} placeholder="${kind === 'writing' ? 'Tulis dalam bahasa Inggris. Gunakan data fiktif.' : 'Catat konteks, pertanyaan lanjutan, dan siapa yang bertanya. Jangan klaim interaksi bila hanya monolog.'}">${esc(draft.text)}</textarea></label>
+    ${stage === 'practice' ? recorderView() : ''}
     ${kind === 'speaking' ? `<label class="field">File audio · maksimal 10 MiB<input name="audio" type="file" accept="${AUDIO_TYPES.join(',')}"></label><p data-mastery-file>${draft.file ? `File dipilih: ${esc(draft.file.name)} (${(draft.file.size / 1024 / 1024).toFixed(1)} MiB). Tetap tersedia selama sesi halaman ini.` : draft.sourceId ? 'Percobaan ulang memakai audio asli yang sudah disimpan di browser ini. Mengunggah file lain membuat kiriman baru.' : 'Unggah MP3, M4A, WAV, WebM, OGG, atau FLAC. Simpan file asli; audio lokal tidak ikut di dalam ekspor JSON.'}</p>` : ''}
     <label class="task-check"><input type="checkbox" name="independent"${draft.independent && !draft.parentId ? ' checked' : ''}${draft.parentId ? ' disabled' : ''}><span>Saya menyatakan draft baru ini dikerjakan mandiri tanpa AI/penerjemah atau contoh jawaban. Pernyataan ini bukan verifikasi aplikasi; revisi selalu ditandai berbantuan.</span></label>
     <label class="task-check"><input type="checkbox" name="consent" required${draft.consent ? ' checked' : ''}><span>Saya setuju teks${kind === 'speaking' ? ' dan audio' : ''} karya ini dikirim ke backend yang saya pilih, lalu ke layanan AI melalui 9router untuk penilaian. Saya tidak menyertakan data sensitif.</span></label></fieldset>
@@ -132,8 +137,8 @@ function assessmentView(row) {
     <small>Model: ${esc(assessment.model)} · Rubrik internal 04-EVALUASI.md. AI bukan verifikasi manusia.</small>`;
 }
 
-function historyView(mastery, week) {
-  const rows = mastery.submissions.filter(row => row.week === week).slice().reverse();
+function historyView(mastery, week, day = null) {
+  const rows = mastery.submissions.filter(row => row.week === week && (day === null ? row.stage !== 'practice' : row.stage === 'practice' && row.day === day)).slice().reverse();
   const reviews = mastery.humanReviews.filter(row => row.week === week);
   return `<section class="mastery-section" aria-labelledby="mastery-history-title"><h3 id="mastery-history-title">4. Riwayat karya, feedback, dan revisi</h3>
     <p>Setiap kiriman disimpan sebagai rekaman terpisah; teks asli, feedback, tanggal, dan tautan revisinya tidak diedit oleh form baru. Riwayat berada di browser ini. Cadangkan progres JSON serta file audio asli secara terpisah.</p>
@@ -150,6 +155,9 @@ function historyView(mastery, week) {
 }
 
 export function disposeMastery() {
+  recorderGeneration += 1;
+  for (const dispose of recorderDisposers) dispose();
+  recorderDisposers = [];
   if (activeAudioUrl) URL.revokeObjectURL(activeAudioUrl);
   activeAudioUrl = null;
 }
@@ -176,6 +184,52 @@ export function masteryView(state) {
     ${historyView(mastery, task.week)}</section>`;
 }
 
+export function speakingPracticeView(state) {
+  const task = taskFor(state.week);
+  if (!task || state.day > 6) return '';
+  const mastery = normalizeMastery(state.mastery);
+  return `<section class="learning-panel mastery" aria-labelledby="speaking-practice-title"><h2 id="speaking-practice-title">Rekam & koreksi grammar</h2><p>Rekam langsung, hentikan, lalu dengarkan ulang sebelum mengirim. Rekaman selesai disimpan di browser ini; unduh audio untuk cadangan. Izin mikrofon bukan persetujuan mengunggah. Maksimal 5 menit / 10 MiB. Berpindah halaman saat merekam membatalkan take yang belum selesai.</p><p>API Gemini melalui backend mentranskripsikan ucapan lalu memberi koreksi grammar bahasa Indonesia. Transkrip dapat salah; cocokkan dengan audio asli. Ini latihan harian, bukan tes mingguan, sertifikasi, atau penilaian pronunciation/kelancaran.</p>${connectionView()}${submissionForm(mastery, task, 'speaking', 'practice', state.day)}${historyView(mastery, state.week, state.day)}</section>`;
+}
+
+export async function mountSpeakingRecorder(root, ctx) {
+  const form = root.querySelector('[data-mastery-submit][data-stage="practice"]');
+  if (!form || form.querySelector('fieldset').disabled) return;
+  const epoch = recorderGeneration;
+  const week = Number(form.dataset.week);
+  const day = Number(form.dataset.day);
+  const draft = draftFor(week, 'speaking', 'practice', day);
+  const localId = `practice-w${week}-d${day}`;
+  try {
+    if (!draft.file && !draft.sourceId && !draft.parentId && !draft.skipRestore) {
+      const stored = await readAudio(localId);
+      if (epoch !== recorderGeneration || !form.isConnected) return;
+      if (stored?.blob) draft.file = new File([stored.blob], stored.name || 'rekaman.webm', { type: stored.blob.type });
+    }
+  } catch (error) { message(form, ctx, error.message); }
+  if (epoch !== recorderGeneration || !form.isConnected) return;
+  const dispose = mountRecorder(form.querySelector('[data-recorder]'), {
+    file: draft.file,
+    onState: active => {
+      form.dataset.recording = String(active);
+      for (const element of [form.querySelector('button[type="submit"]'), form.elements.namedItem('audio'), form.elements.namedItem('parentId')]) element.disabled = active;
+    },
+    onError: text => message(form, ctx, text),
+    onFile: async file => {
+      draft.file = file;
+      draft.sourceId = null;
+      draft.skipRestore = false;
+      form.elements.namedItem('audio').value = '';
+      form.querySelector('[data-mastery-file]').textContent = `Rekaman dipilih: ${file.name}. Menyimpan audio lokal…`;
+      try {
+        await putAudio(localId, file, file.name);
+        if (epoch !== recorderGeneration || !form.isConnected) return;
+        message(form, ctx, 'Rekaman tersimpan di browser ini. Dengarkan ulang, unduh cadangan, lalu setujui pengiriman untuk koreksi grammar.');
+      } catch (error) { if (form.isConnected) message(form, ctx, `${error.message} Rekaman masih tersedia di sesi ini; unduh sebelum meninggalkan halaman.`); }
+    },
+  });
+  recorderDisposers.push(dispose);
+}
+
 function message(element, ctx, text) {
   const output = element.querySelector('[data-mastery-message]');
   if (output) output.textContent = text;
@@ -183,8 +237,9 @@ function message(element, ctx, text) {
 }
 
 function capture(form) {
-  const draft = draftFor(Number(form.dataset.week), form.dataset.kind, form.dataset.stage);
-  if (draft.pending || busy.has(keyOf(Number(form.dataset.week), form.dataset.kind, form.dataset.stage))) return draft;
+  const day = Number(form.dataset.day);
+  const draft = draftFor(Number(form.dataset.week), form.dataset.kind, form.dataset.stage, day);
+  if (draft.pending || busy.has(keyOf(Number(form.dataset.week), form.dataset.kind, form.dataset.stage, day))) return draft;
   draft.text = form.elements.namedItem('text').value;
   draft.parentId = form.elements.namedItem('parentId').value;
   draft.independent = !draft.parentId && form.elements.namedItem('independent').checked;
@@ -245,6 +300,7 @@ function storePending(draft, ctx) {
   draft.pending = null;
   draft.text = '';
   draft.file = null;
+  draft.skipRestore = true;
   draft.parentId = '';
   draft.independent = false;
   draft.sourceId = null;
@@ -257,8 +313,10 @@ async function submitWork(form, ctx) {
   const week = Number(form.dataset.week);
   const kind = form.dataset.kind;
   const stage = form.dataset.stage;
-  const key = keyOf(week, kind, stage);
+  const day = Number(form.dataset.day);
+  const key = keyOf(week, kind, stage, day);
   if (busy.has(key)) return;
+  if (form.dataset.recording === 'true') { message(form, ctx, 'Hentikan rekaman terlebih dahulu sebelum mengirim.'); return; }
   const task = taskFor(week);
   const draft = capture(form);
   const requestGeneration = generation;
@@ -272,10 +330,10 @@ async function submitWork(form, ctx) {
   busy.add(key);
   let audioId = null;
   try {
-    if (!task || !['writing', 'speaking'].includes(kind) || !['weekly', 'phase'].includes(stage) || (stage === 'phase' && !task.phaseTask)) throw new Error('Tugas penilaian tidak valid.');
+    if (!task || !['writing', 'speaking'].includes(kind) || !['weekly', 'phase', 'practice'].includes(stage) || (stage === 'phase' && !task.phaseTask) || (stage === 'practice' && (kind !== 'speaking' || !Number.isInteger(day) || day < 1 || day > 6))) throw new Error('Tugas penilaian tidak valid.');
     if (!draft.consent) throw new Error('Persetujuan pengiriman wajib diberikan untuk karya ini.');
     if (draft.text.length > 20000 || (kind === 'writing' && !draft.text.trim())) throw new Error('Tulisan wajib diisi; teks maksimal 20.000 karakter.');
-    if (draft.parentId && !ctx.state.mastery.submissions.some(row => row.id === draft.parentId && row.week === week && row.kind === kind && row.stage === stage)) throw new Error('Kiriman induk revisi tidak ditemukan untuk tugas ini.');
+    if (draft.parentId && !ctx.state.mastery.submissions.some(row => row.id === draft.parentId && row.week === week && row.kind === kind && row.stage === stage && (stage !== 'practice' || row.day === day))) throw new Error('Kiriman induk revisi tidak ditemukan untuk tugas ini.');
     const saved = connection();
     if (!saved.token.trim()) throw new Error('Simpan token pelajar pada Koneksi penilaian AI terlebih dahulu.');
     apiUrl(saved.api);
@@ -300,12 +358,12 @@ async function submitWork(form, ctx) {
         await putAudio(audioId, file, file.name);
         if (requestGeneration !== generation) { await deleteAudio(audioId); return; }
       }
-      source = Object.freeze({ id: newId(), createdAt: new Date().toISOString(), week, kind, stage, parentId: draft.parentId || null, sourceId: null, text: draft.text, audioId, taskId: masteryTaskId(week, kind, stage), independent: !draft.parentId && draft.independent, assessment: null });
+      source = Object.freeze({ id: newId(), createdAt: new Date().toISOString(), week, ...(stage === 'practice' ? { day } : {}), kind, stage, parentId: draft.parentId || null, sourceId: null, text: draft.text, audioId, taskId: masteryTaskId(week, kind, stage, day), independent: !draft.parentId && draft.independent, assessment: null });
       ctx.state.mastery.submissions.push(source);
       draft.sourceId = source.id;
     }
     if (ctx.persist() === false) throw new Error('Bukti kiriman ada di memori tetapi belum tersimpan permanen. AI belum dihubungi. Cadangkan progres atau coba simpan lagi.');
-    const payload = { week, kind, stage, parentId: source.parentId, text: source.text };
+    const payload = { week, ...(stage === 'practice' ? { day } : {}), kind, stage, parentId: source.parentId, text: source.text };
     if (kind === 'speaking') payload.audio = { base64: await fileBase64(file), mime: file.type.split(';')[0], name: file.name };
     if (requestGeneration !== generation) return;
     draft.message = 'Kiriman tersimpan · menunggu respons penilaian AI yang sebenarnya. Jangan tutup tab.';
@@ -343,7 +401,7 @@ async function audioAction(button, record, ctx) {
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     } else {
-      disposeMastery();
+      if (activeAudioUrl) URL.revokeObjectURL(activeAudioUrl);
       activeAudioUrl = URL.createObjectURL(stored.blob);
       const audio = document.createElement('audio');
       audio.controls = true;
@@ -362,7 +420,7 @@ export async function handleMasteryEvent(event, ctx) {
   const form = target.closest('[data-mastery-submit]');
   if ((event.type === 'input' || event.type === 'change') && form) {
     const week = Number(form.dataset.week);
-    const key = keyOf(week, form.dataset.kind, form.dataset.stage);
+    const key = keyOf(week, form.dataset.kind, form.dataset.stage, Number(form.dataset.day));
     if (busy.has(key)) return true;
     const draft = capture(form);
     if (event.type === 'change' && target.name === 'parentId') {
@@ -372,11 +430,13 @@ export async function handleMasteryEvent(event, ctx) {
       draft.independent = false;
       draft.sourceId = null;
       draft.consent = false;
+      draft.skipRestore = true;
       ctx.refresh();
     } else if (event.type === 'change' && target.name === 'audio') {
       draft.file = target.files?.[0] || null;
       draft.sourceId = null;
       form.querySelector('[data-mastery-file]').textContent = draft.file ? `File dipilih: ${draft.file.name} (${(draft.file.size / 1024 / 1024).toFixed(1)} MiB).` : 'Belum ada file audio dipilih.';
+      if (form.dataset.stage === 'practice') ctx.refresh();
     }
     return true;
   }
@@ -400,10 +460,10 @@ export async function handleMasteryEvent(event, ctx) {
     const record = ctx.state.mastery?.submissions.find(row => row.id === button.dataset.recordId);
     if (action === 'play-audio' || action === 'download-audio') await audioAction(button, record, ctx);
     if ((action === 'revise' || action === 'retry') && record) {
-      const key = keyOf(record.week, record.kind, record.stage);
-      const draft = draftFor(record.week, record.kind, record.stage);
+      const key = keyOf(record.week, record.kind, record.stage, record.day);
+      const draft = draftFor(record.week, record.kind, record.stage, record.day);
       if (busy.has(key) || draft.pending) { message(button.closest('details'), ctx, 'Selesaikan penilaian / penyimpanan yang sedang berjalan sebelum membuat revisi.'); return true; }
-      Object.assign(draft, { parentId: action === 'retry' ? record.parentId || '' : record.id, sourceId: action === 'retry' ? record.id : null, text: record.text, file: null, independent: action === 'retry' && record.independent, consent: false, message: action === 'retry' ? 'Kiriman asli yang sama siap dinilai ulang. Setujui pengiriman lagi; teks dan audio asli dari penyimpanan lokal akan digunakan. Mengubah teks/audio membuat kiriman baru.' : 'Teks lama disalin. Perbaiki berdasarkan feedback; untuk speaking unggah rekaman baru.' });
+      Object.assign(draft, { parentId: action === 'retry' ? record.parentId || '' : record.id, sourceId: action === 'retry' ? record.id : null, text: record.text, file: null, skipRestore: true, independent: action === 'retry' && record.independent, consent: false, message: action === 'retry' ? 'Kiriman asli yang sama siap dinilai ulang. Setujui pengiriman lagi; teks dan audio asli dari penyimpanan lokal akan digunakan. Mengubah teks/audio membuat kiriman baru.' : 'Teks lama disalin. Perbaiki berdasarkan feedback; untuk speaking rekam ulang atau unggah audio baru.' });
       ctx.refresh();
       document.querySelector(`[data-mastery-submit][data-week="${record.week}"][data-kind="${record.kind}"][data-stage="${record.stage}"] textarea`)?.focus();
     }
