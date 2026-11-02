@@ -120,6 +120,7 @@ export function normalizeLearning(input) {
         const row = input.writing[key];
         result.writing[key] = {
           draft: text(row.draft), feedback: text(row.feedback), revision: text(row.revision),
+          task: text(row.task, 1000),
           reviewer: reviewer(row.reviewer), updatedAt: timestamp(row.updatedAt),
           submissions: rows(row.submissions, normalizeSubmission, 100),
         };

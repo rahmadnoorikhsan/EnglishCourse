@@ -4,7 +4,7 @@ import { routeHref } from './router.js';
 import { masteryTasks } from './mastery-content.js';
 import { normalizeMastery, gradeUnderstanding, masteryStatus, masteryTaskId, normalizeAssessment } from './mastery.js';
 import { putAudio, readAudio, deleteAudio } from './audio-store.js';
-import { course } from './course.js';
+import { dailyLesson } from './daily-course.js';
 import { recorderView, mountRecorder } from './recorder.js';
 
 const DEFAULT_API = 'https://englishcourse.43-133-141-109.sslip.io';
@@ -108,8 +108,8 @@ function understandingView(mastery, task) {
 function submissionForm(mastery, task, kind, stage, day) {
   const key = keyOf(task.week, kind, stage, day);
   const draft = draftFor(task.week, kind, stage, day);
-  const parents = mastery.submissions.filter(row => row.week === task.week && row.kind === kind && row.stage === stage && (stage !== 'practice' || row.day === day));
-  const prompt = stage === 'phase' ? task.phaseTask : stage === 'practice' ? course[task.week - 1].output.speaking : task[`${kind}Task`];
+  const prompt = stage === 'phase' ? task.phaseTask : stage === 'practice' ? dailyLesson(task.week, day).output.speaking : task[`${kind}Task`];
+  const parents = mastery.submissions.filter(row => row.week === task.week && row.kind === kind && row.stage === stage && (stage !== 'practice' || (row.day === day && row.taskPrompt === prompt)));
   return `<form class="mastery-submission" data-mastery-submit data-week="${task.week}" data-kind="${kind}" data-stage="${stage}"${stage === 'practice' ? ` data-day="${day}"` : ''} aria-busy="${busy.has(key)}">
     <h4>${esc(kindLabel(kind))} · ${esc(stageLabel(stage))}${stage === 'practice' ? ` · Hari ${day}` : ''}</h4><div class="mastery-task">${lines(prompt)}</div>
     <fieldset${busy.has(key) || draft.pending ? ' disabled' : ''}><legend>${draft.parentId ? 'Revisi karya terdahulu' : 'Karya baru'}</legend>
@@ -145,11 +145,12 @@ function historyView(mastery, week, day = null) {
     ${rows.length ? `<ol class="evidence-list">${rows.map(row => `<li id="mastery-record-${esc(row.id)}"><details${row.id === rows[0].id ? ' open' : ''}><summary>${esc(kindLabel(row.kind))} · ${esc(stageLabel(row.stage))} · ${esc(dateLabel(row.createdAt))} · ${esc(labels[row.assessment?.status] || labels.submitted)}</summary>
       <p>${row.parentId ? `Revisi berbantuan dari <a href="#mastery-record-${esc(row.parentId)}">${esc(row.parentId)}</a> · bukan bukti mandiri baru` : row.independent ? 'Draft mandiri menurut pernyataan pengguna, belum diverifikasi' : 'Kemandirian draft tidak dinyatakan'}</p>
       ${row.sourceId ? `<p>Feedback terkait kiriman <a href="#mastery-record-${esc(row.sourceId)}">${esc(row.sourceId)}</a>; bukan percobaan atau revisi baru.</p>` : ''}
+      ${row.stage === 'practice' ? `<h4>Tugas saat dikirim</h4><p>${row.taskPrompt ? lines(row.taskPrompt) : 'Arsip latihan sebelum pembaruan materi harian. Tidak dinilai ulang terhadap tugas baru.'}</p>` : ''}
       <h4>Teks kiriman asli</h4><p class="mastery-preserve">${row.text ? lines(row.text) : '(Hanya audio; tidak ada catatan teks.)'}</p>
       ${row.audioId ? `<button class="button secondary" type="button" data-mastery-action="play-audio" data-record-id="${esc(row.id)}">Putar audio asli</button><div data-mastery-audio-slot></div><button class="button secondary" type="button" data-mastery-action="download-audio" data-record-id="${esc(row.id)}">Unduh audio asli</button>` : ''}
       ${assessmentView(row)}<p><small>Tugas ${esc(row.taskId)} · ID ${esc(row.id)}</small></p>
-      ${!row.assessment && !row.sourceId ? `<button class="button secondary" type="button" data-mastery-action="retry" data-record-id="${esc(row.id)}">Coba nilai kiriman yang sama</button>` : ''}
-      <button class="button secondary" type="button" data-mastery-action="revise" data-record-id="${esc(row.id)}">Buat revisi dari kiriman ini</button><p data-mastery-message role="status" aria-live="polite"></p>
+      ${!row.assessment && !row.sourceId && (row.stage !== 'practice' || row.taskPrompt === dailyLesson(row.week, row.day).output.speaking) ? `<button class="button secondary" type="button" data-mastery-action="retry" data-record-id="${esc(row.id)}">Coba nilai kiriman yang sama</button>` : ''}
+      ${row.stage !== 'practice' || row.taskPrompt === dailyLesson(row.week, row.day).output.speaking ? `<button class="button secondary" type="button" data-mastery-action="revise" data-record-id="${esc(row.id)}">Buat revisi dari kiriman ini</button>` : ''}<p data-mastery-message role="status" aria-live="polite"></p>
     </details></li>`).join('')}</ol>` : '<p>Belum ada kiriman tersimpan. Tulis atau unggah rekaman, setujui pengiriman, lalu tunggu respons AI yang sebenarnya.</p>'}
     ${reviews.length ? `<h4>Review manusia yang dilaporkan</h4><p>Catatan pengguna, bukan verifikasi identitas penilai oleh aplikasi.</p><ul class="evidence-list">${reviews.map(review => `<li><strong>${esc(review.reviewer)}</strong> · ${esc(dateLabel(review.createdAt))}<p>${esc(stageLabel(review.stage))} · <a href="#mastery-record-${esc(review.submissionId)}">Kiriman ${esc(review.submissionId)}</a></p><p>Skor dilaporkan: ${review.scores.map(score => `${score}/3`).join(' · ')}</p><p>${lines(review.feedback)}</p></li>`).join('')}</ul>` : ''}</section>`;
 }
@@ -198,7 +199,7 @@ export async function mountSpeakingRecorder(root, ctx) {
   const week = Number(form.dataset.week);
   const day = Number(form.dataset.day);
   const draft = draftFor(week, 'speaking', 'practice', day);
-  const localId = `practice-w${week}-d${day}`;
+  const localId = `daily-v1-practice-w${week}-d${day}`;
   try {
     if (!draft.file && !draft.sourceId && !draft.parentId && !draft.skipRestore) {
       const stored = await readAudio(localId);
@@ -331,14 +332,15 @@ async function submitWork(form, ctx) {
   let audioId = null;
   try {
     if (!task || !['writing', 'speaking'].includes(kind) || !['weekly', 'phase', 'practice'].includes(stage) || (stage === 'phase' && !task.phaseTask) || (stage === 'practice' && (kind !== 'speaking' || !Number.isInteger(day) || day < 1 || day > 6))) throw new Error('Tugas penilaian tidak valid.');
+    const taskPrompt = stage === 'practice' ? dailyLesson(week, day).output.speaking : null;
     if (!draft.consent) throw new Error('Persetujuan pengiriman wajib diberikan untuk karya ini.');
     if (draft.text.length > 20000 || (kind === 'writing' && !draft.text.trim())) throw new Error('Tulisan wajib diisi; teks maksimal 20.000 karakter.');
-    if (draft.parentId && !ctx.state.mastery.submissions.some(row => row.id === draft.parentId && row.week === week && row.kind === kind && row.stage === stage && (stage !== 'practice' || row.day === day))) throw new Error('Kiriman induk revisi tidak ditemukan untuk tugas ini.');
+    if (draft.parentId && !ctx.state.mastery.submissions.some(row => row.id === draft.parentId && row.week === week && row.kind === kind && row.stage === stage && (stage !== 'practice' || (row.day === day && row.taskPrompt === taskPrompt)))) throw new Error('Kiriman induk revisi tidak ditemukan untuk tugas ini.');
     const saved = connection();
     if (!saved.token.trim()) throw new Error('Simpan token pelajar pada Koneksi penilaian AI terlebih dahulu.');
     apiUrl(saved.api);
     let source = ctx.state.mastery.submissions.find(row => row.id === draft.sourceId && !row.sourceId);
-    if (source && (source.text !== draft.text || (source.parentId || '') !== draft.parentId)) source = null;
+    if (source && (source.text !== draft.text || (source.parentId || '') !== draft.parentId || (stage === 'practice' && source.taskPrompt !== taskPrompt))) source = null;
     let file = draft.file;
     if (source?.audioId && !file) {
       const stored = await readAudio(source.audioId);
@@ -358,12 +360,12 @@ async function submitWork(form, ctx) {
         await putAudio(audioId, file, file.name);
         if (requestGeneration !== generation) { await deleteAudio(audioId); return; }
       }
-      source = Object.freeze({ id: newId(), createdAt: new Date().toISOString(), week, ...(stage === 'practice' ? { day } : {}), kind, stage, parentId: draft.parentId || null, sourceId: null, text: draft.text, audioId, taskId: masteryTaskId(week, kind, stage, day), independent: !draft.parentId && draft.independent, assessment: null });
+      source = Object.freeze({ id: newId(), createdAt: new Date().toISOString(), week, ...(stage === 'practice' ? { day, taskPrompt } : {}), kind, stage, parentId: draft.parentId || null, sourceId: null, text: draft.text, audioId, taskId: masteryTaskId(week, kind, stage, day), independent: !draft.parentId && draft.independent, assessment: null });
       ctx.state.mastery.submissions.push(source);
       draft.sourceId = source.id;
     }
     if (ctx.persist() === false) throw new Error('Bukti kiriman ada di memori tetapi belum tersimpan permanen. AI belum dihubungi. Cadangkan progres atau coba simpan lagi.');
-    const payload = { week, ...(stage === 'practice' ? { day } : {}), kind, stage, parentId: source.parentId, text: source.text };
+    const payload = { week, ...(stage === 'practice' ? { day, taskPrompt: source.taskPrompt } : {}), kind, stage, parentId: source.parentId, text: source.text };
     if (kind === 'speaking') payload.audio = { base64: await fileBase64(file), mime: file.type.split(';')[0], name: file.name };
     if (requestGeneration !== generation) return;
     draft.message = 'Kiriman tersimpan · menunggu respons penilaian AI yang sebenarnya. Jangan tutup tab.';
@@ -460,6 +462,7 @@ export async function handleMasteryEvent(event, ctx) {
     const record = ctx.state.mastery?.submissions.find(row => row.id === button.dataset.recordId);
     if (action === 'play-audio' || action === 'download-audio') await audioAction(button, record, ctx);
     if ((action === 'revise' || action === 'retry') && record) {
+      if (record.stage === 'practice' && record.taskPrompt !== dailyLesson(record.week, record.day).output.speaking) { message(button.closest('details'), ctx, 'Ini arsip tugas lama. Mulai kiriman baru untuk tugas harian yang sekarang.'); return true; }
       const key = keyOf(record.week, record.kind, record.stage, record.day);
       const draft = draftFor(record.week, record.kind, record.stage, record.day);
       if (busy.has(key) || draft.pending) { message(button.closest('details'), ctx, 'Selesaikan penilaian / penyimpanan yang sedang berjalan sebelum membuat revisi.'); return true; }

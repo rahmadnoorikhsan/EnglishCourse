@@ -4,8 +4,8 @@ import { checkedBlocks, checkKey } from './state.js';
 import { material } from './material.js';
 import { routeHref } from './router.js';
 
-const names = ['Tonton pelajaran', 'Dengar & baca', 'Bicara & tulis', 'Ulangi & evaluasi'];
-const types = ['Video pelajaran', 'Listening & reading', 'Speaking & writing', 'Review & catatan'];
+const names = ['Pola & contoh', 'Dengar & baca', 'Bicara & tulis', 'Ulangi & evaluasi'];
+const types = ['Pelajaran harian', 'Listening & reading', 'Speaking & writing', 'Review & catatan'];
 
 function weekNavigation(state) {
   const week = weeks[state.week - 1];

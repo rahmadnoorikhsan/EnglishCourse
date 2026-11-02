@@ -1,18 +1,23 @@
+import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, copyFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { course } from '../src/course.js';
+import { dailyCourse, dailyLesson, dailyAudioName } from '../src/daily-course.js';
 import { planSpeech } from './audio-plan.mjs';
 
 // Neural speech is prebuilt: the website never loads a model or calls a TTS API.
 if (!process.env.KOKORO_MODEL_DIR) throw new Error('Set KOKORO_MODEL_DIR to the directory containing kokoro-v1.0.onnx and voices-v1.0.bin.');
+assert.deepEqual(dailyCourse.map(item => item.week), Array.from({ length: 26 }, (_, index) => index + 1), 'Audio requires all 26 weeks in order.');
+assert.ok(dailyCourse.every(item => item.days.length === 5), 'Audio requires five practice days per week.');
 const casts = JSON.parse(await readFile(new URL('./audio-cast.json', import.meta.url), 'utf8'));
-const jobs = course.flatMap(item => ['practice', 'assessment'].map(kind => {
-  const name = `w${String(item.week).padStart(2, '0')}-${kind}`;
-  if (!Object.hasOwn(casts, name)) throw new Error(`Missing cast: ${name}`);
-  const text = (kind === 'practice' ? item : item.assessment).listening.text;
-  return { week: item.week, name, segments: planSpeech(text, casts[name], kind === 'practice' ? 'am_michael' : 'af_heart') };
+const jobs = dailyCourse.flatMap(item => Array.from({ length: 6 }, (_, index) => {
+  const day = index + 1;
+  const name = dailyAudioName(item.week, day);
+  const lesson = dailyLesson(item.week, day);
+  const cast = day === 6 ? casts[name] : lesson.cast;
+  if (!cast) throw new Error(`Missing cast: ${name}`);
+  return { week: item.week, name, segments: planSpeech(lesson.listening.text, cast, day === 6 ? 'af_heart' : 'am_michael') };
 }));
 const temp = await mkdtemp(join(tmpdir(), 'englishcourse-audio-'));
 try {

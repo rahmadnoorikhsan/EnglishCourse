@@ -1,5 +1,5 @@
 import { escapeHtml as esc } from './markdown.js';
-import { course } from './course.js';
+import { dailyLesson } from './daily-course.js';
 import { MAX_AUDIO_BYTES, putAudio, readAudio, deleteAudio, clearAudio } from './audio-store.js';
 
 const levels = ['unknown', 'A1', 'A2', 'B1', 'B2', 'C1'];
@@ -70,11 +70,12 @@ function speakingHistory(records) {
 export function portfolioView(state) {
   const key = keyOf(state);
   const writing = state.learning.writing[key] || { draft: '', feedback: '', revision: '', reviewer: 'self', submissions: [] };
-  const output = course[state.week - 1].output;
-  const writingForm = buffer('writing', key, { task: output.writing, level: 'unknown', reviewer: writing.reviewer, independent: false });
+  const output = dailyLesson(state.week, state.day).output;
+  const legacyBuffer = !writing.task && [writing.draft, writing.feedback, writing.revision].some(value => value.trim());
+  const writingForm = buffer('writing', key, { task: writing.task || (legacyBuffer ? '' : output.writing), level: 'unknown', reviewer: writing.reviewer, independent: false });
   const speakingForm = buffer('speaking', key, { task: output.speaking, level: 'unknown', reviewer: 'self', evidence: '', notes: '', independent: false, interactive: false });
-  return `<section class="learning-panel" data-portfolio><h2>Portofolio menulis & berbicara</h2><p>Minggu ${state.week}, hari ${state.day}. Gunakan data fiktif; jangan masukkan informasi sensitif. Bagian ini untuk arsip dan rubrik manual; rekaman mikrofon dan koreksi AI tersedia pada panel Rekam & koreksi grammar di atas.</p>
-    <section aria-labelledby="portfolio-writing-heading"><h3 id="portfolio-writing-heading">Menulis: draft → feedback → revisi</h3><form data-portfolio-form="writing" data-key="${key}" data-week="${state.week}" data-day="${state.day}"><label class="field">Tugas menulis (maksimal 1.000 karakter)<textarea name="task" maxlength="1000" required rows="3">${esc(writingForm.task)}</textarea></label><label class="field">Draft asli (wajib, maksimal 20.000 karakter)<textarea name="draft" maxlength="20000" required rows="7">${esc(writing.draft)}</textarea></label><label class="field">Feedback (opsional; maksimal 20.000 karakter)<textarea name="feedback" maxlength="20000" rows="4">${esc(writing.feedback)}</textarea></label><label class="field">Revisi (opsional; maksimal 20.000 karakter)<textarea name="revision" maxlength="20000" rows="7">${esc(writing.revision)}</textarea></label>${provenanceFields('writing', { ...writingForm, reviewer: writing.reviewer })}<p data-portfolio-save-status role="status">Draft, feedback, revisi, dan asal penilai disimpan otomatis di browser ini saat diedit. Tugas, rubrik, dan pernyataan kemandirian masuk ke snapshot saat disimpan. Maksimal 100 snapshot per sesi.</p><button class="button secondary" type="submit">Simpan snapshot menulis bertanggal</button><p data-portfolio-message role="status" aria-live="polite"></p></form></section>
+  return `<section class="learning-panel" data-portfolio><h2>Portofolio menulis & berbicara</h2><p>Minggu ${state.week}, hari ${state.day}. Gunakan data fiktif; jangan masukkan informasi sensitif. Bagian ini untuk arsip dan rubrik manual; rekaman mikrofon dan koreksi AI tersedia pada panel Rekam & koreksi grammar di atas.</p>${legacyBuffer ? '<p role="status">Buffer tulisan lama dipertahankan. Tugas asalnya belum tersimpan; isi tugas yang benar sebelum membuat snapshot. Jangan menganggap tulisan lama sebagai jawaban tugas harian baru.</p>' : ''}
+    <section aria-labelledby="portfolio-writing-heading"><h3 id="portfolio-writing-heading">Menulis: draft → feedback → revisi</h3><form data-portfolio-form="writing" data-key="${key}" data-week="${state.week}" data-day="${state.day}"><label class="field">Tugas menulis (maksimal 1.000 karakter)<textarea name="task" maxlength="1000" required rows="3">${esc(writingForm.task)}</textarea></label><label class="field">Draft asli (wajib, maksimal 20.000 karakter)<textarea name="draft" maxlength="20000" required rows="7">${esc(writing.draft)}</textarea></label><label class="field">Feedback (opsional; maksimal 20.000 karakter)<textarea name="feedback" maxlength="20000" rows="4">${esc(writing.feedback)}</textarea></label><label class="field">Revisi (opsional; maksimal 20.000 karakter)<textarea name="revision" maxlength="20000" rows="7">${esc(writing.revision)}</textarea></label>${provenanceFields('writing', { ...writingForm, reviewer: writing.reviewer })}<p data-portfolio-save-status role="status">Tugas, draft, feedback, revisi, dan asal penilai disimpan otomatis di browser ini saat diedit. Rubrik dan pernyataan kemandirian masuk ke snapshot saat disimpan. Maksimal 100 snapshot per sesi.</p><button class="button secondary" type="submit">Simpan snapshot menulis bertanggal</button><p data-portfolio-message role="status" aria-live="polite"></p></form></section>
     <section aria-labelledby="portfolio-speaking-heading"><h3 id="portfolio-speaking-heading">Berbicara: bukti & rubrik</h3><form data-portfolio-form="speaking" data-key="${key}" data-week="${state.week}" data-day="${state.day}"><label class="field">Tugas berbicara (maksimal 1.000 karakter)<textarea name="task" maxlength="1000" required rows="3">${esc(speakingForm.task)}</textarea></label><label class="field">Referensi bukti (teks biasa; misalnya nama file, lokasi rekaman, atau catatan penilai; maksimal 20.000 karakter)<textarea name="evidence" maxlength="20000" rows="3">${esc(speakingForm.evidence)}</textarea></label><label class="field">File audio lokal opsional (maksimal 15 MiB)<input name="audio" type="file" accept="audio/*"></label><p data-portfolio-file-status>${speakingForm.file ? `Pilihan sesi ini: ${esc(speakingForm.file.name)}. Pilih file lain untuk mengganti.` : 'Gunakan file audio yang bisa diputar browser ini. Tidak ada perekaman mikrofon atau unggahan ke server.'}</p>${provenanceFields('speaking', speakingForm)}<label class="quiz-choice"><input type="checkbox" name="interactive"${speakingForm.interactive ? ' checked' : ''}><span>Bukti mencakup interaksi dua arah, bukan hanya monolog</span></label><label class="field">Catatan (misalnya bantuan, konteks, dan identitas/peran penilai; maksimal 20.000 karakter)<textarea name="notes" maxlength="20000" rows="3">${esc(speakingForm.notes)}</textarea></label><p>Isi referensi bukti atau pilih file audio. File disimpan sebagai Blob di IndexedDB browser ini; JSON ekspor hanya menyimpan audioId, bukan file audionya. Unduh setiap audio secara terpisah untuk cadangan. Menghapus data browser dapat menghilangkan audio. Maksimal 5.000 bukti berbicara.</p><button class="button secondary" type="submit">Simpan bukti berbicara bertanggal</button><p data-portfolio-message role="status" aria-live="polite"></p></form></section>
     <section><h3>Riwayat snapshot menulis</h3>${writingHistory(state.learning.writing)}</section><section><h3>Riwayat bukti berbicara</h3>${speakingHistory(state.learning.speaking)}</section></section>`;
 }
@@ -97,13 +98,17 @@ function capture(form) {
 
 function saveWritingBuffer(form, ctx) {
   const values = capture(form);
+  if (values.task.length > 1000) {
+    form.querySelector('[data-portfolio-save-status]').textContent = 'Tugas maksimal 1.000 karakter. Buffer belum disimpan; isian tetap tersedia.';
+    return null;
+  }
   if (['draft', 'feedback', 'revision'].some(name => values[name].length > 20000)) {
     form.querySelector('[data-portfolio-save-status]').textContent = 'Buffer belum disimpan: setiap kolom teks maksimal 20.000 karakter. Isian tetap ada; salin teks sebelum mengurangi panjangnya.';
     return null;
   }
   const previous = ctx.state.learning.writing[form.dataset.key];
   const writing = previous || { draft: '', feedback: '', revision: '', reviewer: 'self', submissions: [] };
-  Object.assign(writing, { draft: values.draft, feedback: values.feedback, revision: values.revision, reviewer: values.reviewer, updatedAt: new Date().toISOString() });
+  Object.assign(writing, { task: values.task, draft: values.draft, feedback: values.feedback, revision: values.revision, reviewer: values.reviewer, updatedAt: new Date().toISOString() });
   ctx.state.learning.writing[form.dataset.key] = writing;
   const saved = ctx.persist();
   form.querySelector('[data-portfolio-save-status]').textContent = saved ? 'Buffer tersimpan di browser ini; snapshot lama tidak berubah.' : 'Buffer belum tersimpan permanen. Teks tetap ada di sesi ini; salin teks atau ekspor JSON sebelum menutup halaman.';

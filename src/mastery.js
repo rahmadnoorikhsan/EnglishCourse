@@ -103,7 +103,7 @@ function normalizeSubmission(input) {
   if (input.kind === 'speaking' && !input.audioId && !input.text.trim()) return null;
   return {
     ...meta, week: input.week, kind: input.kind, stage: input.stage, taskId,
-    ...(input.stage === 'practice' ? { day: input.day } : {}),
+    ...(input.stage === 'practice' ? { day: input.day, taskPrompt: textValid(input.taskPrompt) ? input.taskPrompt : '' } : {}),
     parentId: input.parentId, sourceId, text: input.text, audioId: input.audioId,
     assessment: normalizeAssessment(input.assessment), independent: input.independent === true && input.parentId === null,
   };
@@ -140,7 +140,7 @@ function rows(input, normalize) {
 function attachmentSource(row, accepted) {
   const source = accepted.get(row.sourceId);
   if (!source || source.sourceId !== null || source.assessment !== null) return null;
-  return source.taskId === row.taskId && source.parentId === row.parentId && source.text === row.text && source.audioId === row.audioId ? source : null;
+  return source.taskId === row.taskId && source.taskPrompt === row.taskPrompt && source.parentId === row.parentId && source.text === row.text && source.audioId === row.audioId ? source : null;
 }
 
 /** Separate evidence store: never promotes legacy checklists, notes or self-ratings. */
@@ -172,11 +172,12 @@ export function normalizeMastery(input) {
     if (row.parentId !== null) {
       const parentEvent = byId.get(row.parentId);
       const parent = parentEvent && parentEvent.sourceId !== null ? attachmentSource(parentEvent, accepted) : accepted.get(row.parentId);
-      if (!parent || parent.taskId !== row.taskId || parent.createdAt > row.createdAt) continue;
+      if (!parent || parent.taskId !== row.taskId || parent.taskPrompt !== row.taskPrompt || parent.createdAt > row.createdAt) continue;
     }
     // A repeat can show learning, but is not a new unassisted first attempt.
-    if (attemptedTasks.has(row.taskId)) row.independent = false;
-    attemptedTasks.add(row.taskId);
+    const attemptKey = row.stage === 'practice' ? `${row.taskId}:${row.taskPrompt}` : row.taskId;
+    if (attemptedTasks.has(attemptKey)) row.independent = false;
+    attemptedTasks.add(attemptKey);
     accepted.set(row.id, Object.freeze(row));
   }
   for (const row of submissions) {

@@ -480,3 +480,8 @@ noscript { display: block; padding: 1rem; background: #fffaeb; color: #93370d; }
   .learning-panel { break-inside: avoid; }
 }
 @media print { .video-library, .listening-material audio { display: none; } }
+.daily-focus { margin-block: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); }
+.daily-focus h2 { font-size: 1.125rem; line-height: 1.5; }
+.daily-focus summary { padding-block: 0.75rem; cursor: pointer; }
+.daily-focus li { margin-block: 0.5rem; overflow-wrap: anywhere; }
+.daily-focus [aria-current="step"] { color: var(--color-blue); }

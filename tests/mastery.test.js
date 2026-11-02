@@ -316,6 +316,18 @@ test('practice day and immutable source survive assessment retries, revisions an
   }
 });
 
+test('daily task wording survives reload and cannot be replaced by feedback or revision', () => {
+  const original = practice(1, 2, 2, { taskPrompt: 'Introduce two other people.', assessment: null });
+  const result = { ...original, id: id(3), createdAt: date(3), sourceId: original.id, assessment: assessment() };
+  const changedFeedback = { ...result, id: id(4), taskPrompt: 'Introduce yourself instead.' };
+  const changedRevision = practice(1, 2, 5, { taskPrompt: 'Introduce yourself instead.', parentId: result.id });
+  const data = normalizeMastery({ submissions: [original, result, changedFeedback, changedRevision] });
+  assert.deepEqual(data.submissions.map(row => row.id), [original.id, result.id]);
+  assert.equal(normalizeMastery(JSON.parse(JSON.stringify(data))).submissions[0].taskPrompt, original.taskPrompt);
+  const legacy = practice(1, 2, 6);
+  assert.equal(normalizeMastery({ submissions: [legacy] }).submissions[0].text, legacy.text);
+});
+
 test('practice never satisfies weekly, phase or reported-human mastery gates', () => {
   for (const week of [1, 4, 8, 12, 16, 20, 24, 26]) {
     const rows = Array.from({ length: 6 }, (_, index) => practice(week, index + 1, index + 4));

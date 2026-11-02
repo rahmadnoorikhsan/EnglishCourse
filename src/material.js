@@ -1,14 +1,14 @@
-import { course } from './course.js';
+import { dailyCourse, dailyLesson, dailyAudioName } from './daily-course.js';
 import { videos } from './videos.js';
 import { markdown, escapeHtml as esc } from './markdown.js';
 import { routeHref } from './router.js';
 
 const dayInstructions = [
-  'Pelajari penjelasan dan contoh. Simpan percobaan awal sebelum membuka bantuan.',
-  'Ingat kembali contoh kemarin, lalu ganti nama, waktu, atau situasinya.',
-  'Gunakan pola yang sama untuk contoh berbeda. Tutup teks sebelum menceritakan ulang.',
-  'Periksa dua kesalahan yang sering muncul, lalu revisi jawabanmu.',
-  'Kerjakan tugas mingguan dengan bantuan minimal. Jangan membuka paket evaluasi hari 6.',
+  'Mulai dari fokus hari ini. Coba dulu sebelum melihat contoh jawaban.',
+  'Ingat pola kemarin, lalu pelajari keterampilan baru pada paket hari ini.',
+  'Gabungkan keterampilan sebelumnya dengan kontras atau detail baru hari ini.',
+  'Terapkan pola pada situasi baru dan perbaiki kesalahan dengan alasan.',
+  'Gabungkan keterampilan minggu ini dengan bantuan minimal.',
   'Paket evaluasi baru. Catat jawaban pertama sebelum melihat pembahasan. Hasil latihan ini bukan skor CEFR.',
 ];
 
@@ -28,21 +28,21 @@ function videoMaterial(week) {
 }
 
 export function material(week, day, step) {
-  const item = course[week.number - 1];
+  const item = dailyLesson(week.number, day);
   const assess = day === 6;
   let content;
   if (step === 0) {
-    content = `${assess ? '<p>Ingat kembali isi video sebelum menontonnya ulang.</p>' : ''}${videoMaterial(week)}<section class="supplementary-material" aria-labelledby="lesson-notes-heading"><h2 id="lesson-notes-heading">Catatan pelajaran</h2><div class="lesson-study-grid"><div class="prose lesson-explanation">${markdown(item.explanation)}<h3>Contoh & arti</h3><ul class="example-list">${item.examples.map(example=>`<li><span lang="en">${esc(example.en)}</span><small>${esc(example.id)}</small></li>`).join('')}</ul></div><section class="lesson-vocabulary" aria-labelledby="vocabulary-heading"><h3 id="vocabulary-heading">Kosakata</h3><dl class="vocabulary-list">${item.vocabulary.map(word=>`<div><dt lang="en">${esc(word.en)}</dt><dd>${esc(word.id)}</dd></div>`).join('')}</dl></section></div>${questionSet(item.quizzes.pattern,'pattern','Cek pemahaman')}</section>`;
+    content = `${day === 1 ? videoMaterial(week) : `<details><summary>Video referensi minggu ini · opsional, bukan pelajaran harian baru</summary>${videoMaterial(week)}</details>`}<section class="supplementary-material" aria-labelledby="lesson-notes-heading"><h2 id="lesson-notes-heading">${esc(item.title)}</h2><p><strong>Target hari ini:</strong> ${esc(item.objective)}</p><div class="lesson-study-grid"><div class="prose lesson-explanation">${markdown(item.explanation)}<h3>Contoh & arti</h3><ul class="example-list">${item.examples.map(example=>`<li><span lang="en">${esc(example.en)}</span><small>${esc(example.id)}</small></li>`).join('')}</ul></div><section class="lesson-vocabulary" aria-labelledby="vocabulary-heading"><h3 id="vocabulary-heading">Kosakata</h3><dl class="vocabulary-list">${item.vocabulary.map(word=>`<div><dt lang="en">${esc(word.en)}</dt><dd>${esc(word.id)}</dd></div>`).join('')}</dl></section></div>${questionSet(item.quizzes.pattern,'pattern','Cek pemahaman')}</section>`;
   } else if (step === 1) {
-    const pack = assess ? item.assessment : item;
-    const audioPath = `${import.meta.env.BASE_URL}audio/w${String(week.number).padStart(2,'0')}-${assess?'assessment':'practice'}.mp3?v=kokoro-cast-v2`;
-    content = `<section class="listening-material"><h2>${assess?'Evaluasi':'Latihan'} mendengar</h2><p>Dengarkan dahulu tanpa transkrip. Jawab pertanyaan, baru buka teks untuk memeriksa.</p><h3>${esc(pack.listening.title)}</h3><audio controls preload="none" src="${audioPath}">Browser tidak mendukung pemutar audio.</audio><p class="muted">Suara AI neural · American English · Kokoro. Dialog memakai suara laki-laki/perempuan berbeda sesuai tokoh. Dibuat untuk latihan, bukan rekaman manusia atau tes listening terstandar.</p><details class="transcript"><summary>Buka transkrip setelah mencoba</summary><p lang="en">${esc(pack.listening.text)}</p></details>${questionSet(assess?pack.listeningQuiz:item.quizzes.listening,'listening','Pemahaman audio')}</section><section class="reading-material"><h2>${assess?'Evaluasi':'Latihan'} membaca</h2>${passage(pack.reading)}${questionSet(assess?pack.readingQuiz:item.quizzes.reading,'reading','Pemahaman bacaan')}</section>`;
+    const audioPath = `${import.meta.env.BASE_URL}audio/${dailyAudioName(week.number, day)}.mp3?v=daily-v1`;
+    content = `<section class="listening-material"><h2>${assess?'Evaluasi':'Latihan'} mendengar</h2><p>Dengarkan dahulu tanpa transkrip. Jawab pertanyaan, baru buka teks untuk memeriksa.</p><h3>${esc(item.listening.title)}</h3><audio controls preload="none" src="${audioPath}">Browser tidak mendukung pemutar audio.</audio><p class="muted">Suara AI neural · American English · Kokoro. Pemeran dialog ditetapkan per naskah. Semua situasi fiktif untuk latihan, bukan rekaman manusia atau tes listening terstandar.</p><details class="transcript"><summary>Buka transkrip setelah mencoba</summary><p lang="en">${esc(item.listening.text)}</p></details>${questionSet(item.quizzes.listening,'listening','Pemahaman audio')}</section><section class="reading-material"><h2>${assess?'Evaluasi':'Latihan'} membaca</h2>${passage(item.reading)}${questionSet(item.quizzes.reading,'reading','Pemahaman bacaan')}</section>`;
   } else if (step === 2) {
     content = `<section class="prose"><h2>Latihan berbicara</h2><p>${esc(item.output.speaking)}</p><p>${day===1?'Rekam respons pertama sebelum meniru contoh.':'Ubah konteks atau contoh dari latihan sebelumnya; jangan hanya membaca naskah yang sama.'}</p><p>Gunakan panel Rekam & koreksi grammar di bawah untuk merekam lewat mikrofon, mendengarkan ulang, lalu mengirim dengan persetujuan. Koreksi AI berdasarkan transkrip, bukan penilaian pronunciation.</p><h2>Latihan menulis</h2><p>${esc(item.output.writing)}</p><p>Tulis draft di bawah. Simpan versi awal sebelum mengoreksi. Gunakan nama dan data fiktif untuk simulasi; jangan masukkan informasi sensitif.</p><h3>Periksa sendiri</h3><ul><li>Apakah maksud utama dan detailnya jelas?</li><li>Apakah pola bahasa minggu ini digunakan dengan tepat?</li><li>Apakah contoh dan klaim didukung oleh teks, atau sudah ditandai sebagai pendapat/simulasi?</li></ul><p>Feedback AI sementara dan dapat keliru. Minta feedback manusia untuk mengecek pengucapan, interaksi, atau keputusan tingkat kemampuan.</p></section>`;
   } else {
     content = `<section class="prose"><h2>Ulangi & perbaiki</h2><p>${esc(item.review)}</p><ol><li>Tutup contoh. Ucapkan kembali ide utama dari tiga sampai lima kata kunci.</li><li>Bandingkan draft awal dan revisi. Pilih dua kesalahan prioritas, lalu tulis contoh baru.</li><li>Catat hasil pertama kuis, bantuan yang dipakai, serta satu hal yang perlu diulang.</li></ol>${assess?`<p>Jika paket ini pernah dilihat, jangan mencatatnya sebagai evaluasi materi baru. Audio sintetis dan kuis singkat tidak menetapkan level bahasa. Gunakan rubrik empat keterampilan untuk keputusan lanjut/ulang.</p><a class="action-link" href="${routeHref('panduan/evaluasi')}">Rubrik evaluasi</a>`:''}<h3>Hasil minggu ini</h3>${markdown(week.outcome)}</section>`;
   }
-  return `<section class="lesson-material">${step === 0 ? '' : `<p class="day-instruction">${dayInstructions[day-1]}</p>`}${content}<div class="material-credit"><a class="action-link" href="${routeHref('panduan/sumber')}">Sumber belajar</a></div></section>`;
+  const progression = [...dailyCourse[week.number - 1].days, dailyLesson(week.number, 6)];
+  return `<section class="lesson-material"><header class="daily-focus"><h2>Hari ${day} · ${esc(item.title)}</h2><p><strong>Target:</strong> ${esc(item.objective)}</p><details><summary>Alur belajar minggu ini</summary><ol>${progression.map((entry, index) => `<li${index + 1 === day ? ' aria-current="step"' : ''}><strong>Hari ${index + 1}${index + 1 === day ? ' · sekarang' : ''}:</strong> ${esc(entry.title)}</li>`).join('')}<li>Hari 7: istirahat dan review ringan opsional</li></ol></details></header><p class="day-instruction">${dayInstructions[day - 1]}</p>${content}<div class="material-credit"><a class="action-link" href="${routeHref('panduan/sumber')}">Sumber belajar</a></div></section>`;
 }
 
 

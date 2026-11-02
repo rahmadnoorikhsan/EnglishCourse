@@ -1,9 +1,7 @@
 import { escapeHtml as esc } from './markdown.js';
 import { recordAttempt } from './learning.js';
+import { materialIdentity } from './quiz.js';
 
-export function materialIdentity(week, day, kind) {
-  return `local:w${week}:${day === 6 && kind !== 'pattern' ? 'assessment' : 'practice'}:${kind}`;
-}
 
 export function mountQuizTracking(state, root) {
   for (const form of root.querySelectorAll('[data-quiz]')) {
@@ -34,7 +32,7 @@ export function saveQuizAttempt(state, form, choices, results) {
     score: results.filter(result => result.correct).length, total: results.length,
     createdAt: new Date().toISOString(), mode: state.day === 6 && kind !== 'pattern' ? 'assessment' : 'practice',
     fresh: Boolean(form.elements.namedItem('evidence-fresh')?.checked), assisted: Boolean(form.elements.namedItem('evidence-assisted')?.checked),
-    level: 'unknown', source: `Paket lokal minggu ${state.week} · ${state.day === 6 && kind !== 'pattern' ? 'evaluasi' : 'latihan'} · ${kind}`,
+    level: 'unknown', source: `Paket harian minggu ${state.week} · hari ${state.day} · ${state.day === 6 && kind !== 'pattern' ? 'evaluasi' : 'latihan'} · ${kind}`,
   });
   if (!row) return false;
   const checkbox = form.elements.namedItem('evidence-fresh');

@@ -51,6 +51,17 @@ test('empty learning containers are isolated and insufficient evidence collects 
   assert.ok(result.reasons.length && result.actions.length);
 });
 
+test('writing buffers preserve their task across reload without relabelling legacy drafts', () => {
+  const learning = emptyLearning();
+  learning.writing['w1-d2'] = { task: 'Describe the old photograph.', draft: 'Original response.', feedback: 'Keep the source.', revision: '', reviewer: 'self', updatedAt: stamp(20), submissions: [] };
+  learning.writing['w1-d3'] = { draft: 'Legacy response without a stored task.', feedback: '', revision: '', reviewer: 'self', submissions: [] };
+  const restored = normalizeLearning(JSON.parse(JSON.stringify(learning)));
+  assert.equal(restored.writing['w1-d2'].task, 'Describe the old photograph.');
+  assert.equal(restored.writing['w1-d2'].draft, 'Original response.');
+  assert.equal(restored.writing['w1-d3'].task, '');
+  assert.equal(restored.writing['w1-d3'].draft, learning.writing['w1-d3'].draft);
+});
+
 test('recordAttempt appends UUID evidence and repeats across weeks cannot claim freshness', () => {
   const learning = emptyLearning();
   const original = attempt(learning, 'reading', 'same', { week: 1, score: 2 });
