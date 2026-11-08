@@ -7,7 +7,7 @@ Panduan ini **rancangan latihan**, bukan metode yang menjamin level tertentu. Da
 1. Enam hari belajar, satu hari istirahat. Gunakan hari 1–6, tidak harus Senin–Sabtu. Mulai kapan saja; 26 minggu = 182 hari kalender.
 2. Default 180 menit **fokus**/hari, boleh dibagi pagi 60, siang 60, malam 60. Istirahat, mencari video, dan menyiapkan aplikasi tidak dihitung. Jika tidak tersedia, pilih versi lebih singkat di bawah dan sesuaikan ekspektasi.
 3. Satu tema per minggu dengan progresi harian: fondasi → keterampilan tambahan → kontras/detail → penerapan/perbaikan → integrasi mandiri → evaluasi baru. Review memakai pola yang sudah dikenal, tetapi bacaan, audio, kuis, dan tugas harian berbeda. Jangan pindah ke idiom bisnis saat perkenalan saja belum bisa.
-4. Maksimal dua pelajaran engVid baru per minggu. Pelajaran panjang dibagi beberapa hari. Tidak perlu menamatkan seluruh situs atau semua tenses.
+4. Website menyediakan satu video pembelajaran berbeda untuk setiap hari aktif sampai minggu 26. Ikuti fokus menonton dan tugas penerapan hari tersebut; ambil bagian pendek yang relevan, bukan wajib menamatkan video panjang. Video hari 6 dipelajari pada Review setelah evaluasi. Hari 7 tetap istirahat/review ringan opsional.
 5. Setiap pelajaran menghasilkan kalimat sendiri, bukan catatan salinan. Setiap minggu menghasilkan rekaman, tulisan versi awal dan revisi, serta bukti pemahaman materi baru.
 6. Bahasa Indonesia boleh menjadi jembatan. Pahami arti terlebih dahulu; kemudian tutup terjemahan dan gunakan Inggris. Jangan memaksakan penjelasan full-English yang belum dipahami.
 7. Kejelasan dan ketepatan makna lebih penting daripada aksen native, idiom, atau kalimat panjang.
@@ -46,7 +46,7 @@ Semua total memakai enam hari/minggu. Pada versi 60 menit, selang-seling fokus l
 3. Catat maksimal tiga pola penting beserta arti Indonesia. Contoh: `Are you a student?` = Apakah kamu mahasiswa/pelajar?
 4. Pause, jawab contoh guru sebelum jawabannya muncul. Tutup video; buat lima kalimat tentang diri sendiri dan ucapkan.
 5. Kerjakan kuis tanpa catatan bila tersedia. Catat hasil **percobaan pertama**, lalu pahami kesalahan. Nilai kuis tidak membuktikan kemampuan berbicara.
-6. Besok: tanpa video, buat tiga pertanyaan baru dan jawab secara lisan. Tes ulang pada konteks lain di akhir minggu. Baru anggap pola mulai bisa dipakai.
+6. Besok, sebelum membuka video hari berikutnya: tanpa melihat video kemarin, buat tiga pertanyaan baru dan jawab secara lisan. Tes ulang pada konteks lain di akhir minggu. Baru anggap pola mulai bisa dipakai.
 
 **Jika tidak mengerti:** ambil hanya contoh paling dasar, terjemahkan 1–3 kalimat, lalu kembali ke dialog VOA atau British Council A1. Hentikan pelajaran setelah 10 menit kebingungan tanpa kemajuan. Jangan menghabiskan satu hari mencatat aturan yang belum bisa digunakan.
 
@@ -135,7 +135,7 @@ Pilih satu model audio UK atau US untuk ditiru pada awalnya; kedua varian sah. S
 
 - Hari 1: kenali tema, ambil pelajaran utama, draft/rekaman awal.
 - Hari 2: latihan terarah, input baru ringan, percakapan pertama.
-- Hari 3: variasi konteks, bukan video baru terus.
+- Hari 3: variasi konteks dan video khusus kontras/detail hari ini; tetap prioritaskan penerapan, bukan menonton saja.
 - Hari 4: ulang tanpa catatan; feedback dan revisi.
 - Hari 5: tugas terintegrasi dan percakapan kedua/ketiga sesuai fase.
 - Hari 6: cek materi **belum pernah dilihat**, ambil bukti, pilih dua perbaikan minggu berikutnya. Gunakan [04-EVALUASI.md](04-EVALUASI.md).

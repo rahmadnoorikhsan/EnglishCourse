@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
 import { stat, readFile } from 'node:fs/promises';
 import { dailyCourse, dailyLesson, dailyAudioName } from '../src/daily-course.js';
+import { videos, dailyVideo } from '../src/videos.js';
 import { planSpeech } from './audio-plan.mjs';
 
 const casts = JSON.parse(await readFile(new URL('./audio-cast.json', import.meta.url), 'utf8'));
 assert.deepEqual(dailyCourse.map(item => item.week), Array.from({ length: 26 }, (_, index) => index + 1));
+assert.equal(videos.length, 156, 'one video for every active day');
+for (const field of ['code', 'id', 'source']) assert.equal(new Set(videos.map(video => video[field])).size, 156, `daily video ${field} must be globally unique`);
 const passages = new Set();
 const scripts = new Set();
 for (const unit of dailyCourse) {
@@ -15,6 +18,12 @@ for (const unit of dailyCourse) {
   for (let day = 1; day <= 6; day++) {
     const item = dailyLesson(unit.week, day);
     const label = `week ${unit.week} day ${day}`;
+    const video = dailyVideo(unit.week, day);
+    assert.ok(video, `${label}: daily video`);
+    assert.equal(video.code, `W${String(unit.week).padStart(2, '0')}D${day}`, `${label}: video date`);
+    assert.match(video.id, /^[A-Za-z0-9_-]{11}$/, `${label}: YouTube ID`);
+    assert.equal(new URL(video.source).protocol, 'https:', `${label}: official source HTTPS`);
+    for (const field of ['title', 'focus', 'task']) assert.ok(video[field]?.trim(), `${label}: video ${field}`);
     for (const field of ['title', 'objective', 'explanation', 'review']) assert.ok(item[field]?.trim(), `${label}: ${field}`);
     assert.ok(!titles.has(item.title), `${label}: repeated focus`);
     titles.add(item.title);
@@ -51,4 +60,4 @@ for (const unit of dailyCourse) {
     assert.ok((await stat(file)).size > 0, file);
   }
 }
-console.log('156 complete daily packages (130 practice + 26 evaluation) and 156 audio assets validated.');
+console.log('156 complete daily packages (130 practice + 26 evaluation), 156 distinct daily videos, and 156 audio assets validated.');

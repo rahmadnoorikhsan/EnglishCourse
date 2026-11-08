@@ -1,8 +1,8 @@
 # Sumber terpilih
 
-Diperiksa 31 Oktober 2026. Kode di sini dipakai kurikulum. Audit berupa pembacaan halaman/deskripsi/transkrip, bukan penuntasan video, kuis, atau pembuatan akun.
+Referensi umum diperiksa 31 Oktober 2026; penugasan video harian diperbarui 8 November 2026. Kode E/L/R/G/B/V/S tetap dipakai sebagai referensi kurikulum. Audit sumber berupa pembacaan halaman, deskripsi, dan metadata/player, bukan penuntasan seluruh video, kuis, atau pembuatan akun.
 
-**Jalur website:** video pengajaran asli engVid tampil di awal langkah pertama melalui player YouTube resmi setelah klik **Tonton video asli**. Penjelasan Indonesia, teks, audio sintetis, dan kuis lokal adalah tambahan buatan EnglishCourse, bukan pengganti/salinan/kuis resmi sumber. Minggu tanpa video baru ditandai sebagai review pustaka video. Tautan di bawah tetap sumber kurikulum dan pengayaan; materi pihak ketiga tidak disalin massal. Hari 6 memiliki paket latihan lokal berbeda, bukan tes resmi. Evaluasi kompetensi tetap memakai bukti empat keterampilan dan feedback.
+**Jalur website:** tersedia satu video pembelajaran berbeda untuk setiap hari aktif, 156 video pada minggu 1–26, dengan fokus menonton dan tugas penerapan Indonesia. Hari 1–5 menampilkan video pada langkah pertama; hari 6 menempatkannya di **Ulangi & evaluasi** setelah tugas evaluasi. Hari 7 tetap istirahat/review opsional. Player YouTube resmi dimuat hanya setelah tombol video diklik, disertai tautan **Sumber asli** dan **YouTube**. Video panjang tidak wajib ditamatkan: ikuti fokus hari itu dalam potongan pendek. Penjelasan Indonesia, panduan menonton, tugas penerapan, teks, audio sintetis, dan kuis lokal dibuat EnglishCourse, bukan salinan atau kuis resmi sumber. Evaluasi kompetensi tetap memakai bukti empat keterampilan dan feedback, bukan jumlah video yang ditonton.
 
 ## Stack minimum dan akses
 
@@ -10,7 +10,7 @@ Hari biasa: satu penjelasan engVid/grammar, satu sumber input British Council **
 
 | Sumber | Fungsi dan kapan | Akses yang terkonfirmasi serta batas |
 |---|---|---|
-| [engVid](https://www.engvid.com/) | Penjelasan utama; ambil tautan E01–E12 di bawah | Situs menyatakan video gratis; halaman materi dan bagian kuis terbaca. Kuis interaktif tidak diuji; tutor privat terpisah, harga tidak diperiksa. Label level bukan ekuivalensi CEFR. |
+| [engVid](https://www.engvid.com/) | Bank penjelasan utama; penugasan harian berada di kelas, E01–E12 di bawah adalah referensi tambahan | Situs menyatakan video gratis; halaman materi dan bagian kuis terbaca. Kuis interaktif tidak diuji; tutor privat terpisah, harga tidak diperiksa. Label level bukan ekuivalensi CEFR. |
 | [British Council listening](https://learnenglish.britishcouncil.org/free-resources/listening) dan [reading](https://learnenglish.britishcouncil.org/free-resources/reading) | Input dan latihan bertingkat A1–C1 | Konten publik terbaca tanpa akun; komentar meminta login. Tidak menganggap semua kursus atau fitur akun gratis. |
 | [VOA Let's Learn English Level 1](https://learningenglish.voanews.com/p/5644.html) | Dialog pemula saat engVid terlalu sulit | Rancangan penyedia 52 minggu dengan video, speaking, vocabulary, writing, worksheets dan assessments; tidak sama dengan janji A1 atau enam bulan. Halaman publik terbaca; seluruh fitur akun tidak diaudit. |
 | [Cambridge Dictionary pronunciation](https://dictionary.cambridge.org/pronunciation/) | Cek audio dan stress kata | Cuplikan pencarian resmi menyebut audio UK/US; halaman langsung gagal/kosong dalam audit. Bila tidak terbuka gunakan model audio pelajaran dahulu. [Oxford entri hello](https://www.oxfordlearnersdictionaries.com/definition/english/hello) berhasil dibaca untuk IPA/contoh; pemutaran audio tidak diuji. Pilih satu kamus, bukan dua tugas. |
@@ -23,7 +23,7 @@ Jika dana nol: pakai halaman publik, alat rekam bawaan, kartu kertas/Anki deskto
 
 ## engVid: urutan yang dipilih
 
-Semua URL berikut dibaca pada judul, tujuan, label, dan bagian kuis. Tidak mengklaim semua video sudah ditonton. Dua video baru/minggu adalah batas maksimal, bukan kewajiban. Jika hanya satu topik diperlukan, gunakan sisanya untuk praktik.
+Daftar E01–E12 berikut dipertahankan sebagai **referensi topik**, bukan daftar video harian. Kelas memakai katalog terpisah di `src/daily-videos-foundations.js` (minggu 1–8), `src/daily-videos-workplace.js` (9–17), dan `src/daily-videos-academic.js` (18–26), dipilih berdasarkan minggu/hari oleh `src/videos.js`. Setiap entri menyimpan judul, ID YouTube dari player sumber, URL halaman resmi, fokus, dan tugas penerapan; tidak memakai hasil pencarian atau fallback mingguan sebagai pelajaran. Buka **Sumber asli** pada video hari terkait untuk halaman penyedianya. ID dan sumber diperiksa, tetapi tidak ada klaim bahwa semua video sudah ditonton penuh atau pemutaran dijamin di semua wilayah/browser. Jika embed dibatasi, coba tautan YouTube atau halaman sumber; jangan mengganti tugas berbicara/menulis dengan menonton berulang.
 
 | Kode | Pelajaran | Dipakai untuk | Batas kesiapan |
 |---|---|---|---|
