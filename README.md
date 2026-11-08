@@ -16,7 +16,7 @@ Navigasi pendukung (silabus, sumber, evaluasi, kembali ke referensi, dan footer)
 
 Checklist dan catatan lama tetap digunakan dan dimigrasikan otomatis. Progres disimpan **hanya di browser/perangkat yang sama**; tidak tersinkron atau terkirim ke GitHub. Ekspor JSON dari Progres untuk arsip. JSON memuat riwayat hasil, waktu, tulisan, rubrik, dan referensi audio, **bukan file audio**; unduh audio satu per satu dari portofolio. JSON adalah arsip, bukan fitur impor kembali. Menghapus data browser menghapus progres dan audio lokal; jangan masukkan informasi sensitif. Tombol selesai mencatat aktivitas, bukan nilai atau kelulusan CEFR.
 
-Sumber Markdown di repository tetap menjadi sumber kurikulum/referensi. Paket materi asli di `src/course-*.js` melengkapi kurikulum dengan teks dan soal lokal, bukan salinan pelajaran pihak ketiga. Catatan harian lama tetap tersedia (maksimal 5.000 karakter). Pada **Bicara & tulis**, portofolio manual memisahkan draft, feedback, dan revisi dengan snapshot bertanggal; audio manual tetap lokal (maksimal 15 MiB). Panel **Rekam & koreksi grammar** dapat merekam mikrofon, memutar ulang, dan mengirim latihan harian. Panel AI pada langkah **Review** menangani tugas mingguan/fase terpisah. Teks/audio AI (maksimal 10 MiB) hanya dikirim setelah persetujuan eksplisit, melalui backend pribadi lalu 9router. Jangan kirim data sensitif atau suara orang lain tanpa izin.
+Sumber Markdown di repository tetap menjadi sumber kurikulum/referensi. Paket materi asli di `src/course-*.js` melengkapi kurikulum dengan teks dan soal lokal, bukan salinan pelajaran pihak ketiga. Catatan harian lama tetap tersedia (maksimal 5.000 karakter). Pada **Bicara & tulis**, panel **Latihan bicara langsung** menjadi alur utama: rekam mikrofon, putar ulang, dan minta koreksi harian tanpa memilih berkas. Portofolio menulis dan arsip manual berada dalam panel opsional terlipat; audio manual tetap lokal (maksimal 15 MiB). Panel AI pada langkah **Review** menangani tugas mingguan/fase terpisah. Teks/audio AI (maksimal 10 MiB) hanya dikirim setelah persetujuan eksplisit, melalui backend pribadi lalu 9router. Jangan kirim data sensitif atau suara orang lain tanpa izin.
 
 ## Target yang jujur
 
@@ -110,6 +110,12 @@ Audio tersimpan di `public/audio/` sebagai MP3 mono 96 kbps. Rebuild memerlukan 
 
 URL kelas berbentuk `/EnglishCourse/belajar/1/1/video/` (minggu/hari/langkah), bukan hash atau nomor langkah tanpa nama. Langkah lain: `input`, `output`, `review`, `ringkasan`. Bagian lain memakai `/silabus/`, `/referensi/`, dan `/progres/`. Tautan bagian dokumen tetap memakai anchor `#judul-bagian`. Tombol Back/Forward mengikuti perpindahan langkah dan halaman; checklist tidak menambah riwayat. Buka `/belajar/` untuk melanjutkan posisi terakhir. URL spesifik selalu membuka posisi yang diminta, tanpa menghapus checklist/draft.
 
+## Catatan perubahan: alur mikrofon — 9 November 2026
+
+- Latihan harian memakai mikrofon tanpa pemilih file; formulir arsip manual dipisahkan sebagai bagian opsional. Persetujuan pengiriman tetap eksplisit.
+- Transkrip dan koreksi terbaru muncul di panel latihan, dengan tombol rekam ulang berdasarkan feedback. Riwayat, relasi revisi, dan tugas mingguan/fase tetap terpisah.
+- Verifikasi: rekam dan playback melalui MediaRecorder Chromium dengan masukan ujaran fixture sintetis; backend AI nyata merespons HTTP 200 dengan transkrip dan feedback. Feedback bertahan reload; revisi meminta rekaman baru; draft lokal dipulihkan dan tombol kirim aktif. Tampilan 390 px diperiksa tanpa overflow; pemilih file manual tidak terlihat sebelum panel dibuka. Fixture bukan bukti kemampuan pengguna. 85 tes, syntax check, pemeriksa materi, build, dan audit dependency lulus; peringatan bundle >500 kB tetap ada.
+
 ## Catatan perubahan: video harian — 8 November 2026
 
 - Referensi video mingguan diganti **156 video berbeda**, satu untuk setiap hari aktif sampai minggu 26. Setiap video memiliki fokus menonton dan praktik penerapan Indonesia; video hari evaluasi berada pada langkah Review. Hari 7 tetap istirahat.
@@ -134,9 +140,11 @@ URL kelas berbentuk `/EnglishCourse/belajar/1/1/video/` (minggu/hari/langkah), b
 - **Riwayat tidak ditimpa:** kiriman disimpan sebelum menghubungi AI. Kegagalan jaringan/provider mempertahankan teks dan audio lokal. **Coba nilai kiriman yang sama** memakai bukti asli, sedangkan feedback sukses ditambahkan sebagai snapshot terkait; revisi mengacu ke kiriman induk dan tidak dianggap bukti mandiri baru. Ekspor JSON berisi teks/feedback/referensi, bukan file audio. Unduh audio asli terpisah. Isian yang belum dikirim hanya bertahan pada sesi halaman.
 - **Batas speaking:** teks saja tidak cukup. Bila hanya transkripsi tersedia, keterpahaman/kelancaran tidak diberi skor dan tugas belum lulus. Monolog atau simulasi pertanyaan sendiri bukan bukti interaksi spontan. AI dapat salah; checkpoint penting tetap membutuhkan penilai manusia.
 
-### Rekam & koreksi grammar di langkah 3
+### Latihan bicara langsung di langkah 3
 
-Pada **Bicara & tulis** (hari 1–6), pilih **Mulai rekam**, izinkan mikrofon, lalu **Hentikan rekaman**. Dengarkan ulang atau unduh audio sebelum mencentang persetujuan dan mengirim ke AI. Rekaman tidak diunggah otomatis. Memerlukan HTTPS/localhost dan browser dengan MediaRecorder; unggah audio tetap tersedia bila mikrofon tidak didukung/ditolak. Batas 5 menit / 10 MiB; timer dapat terlambat saat tab ditangguhkan. Berpindah halaman membatalkan take aktif dan melepaskan mikrofon.
+Pada **Bicara & tulis** (hari 1–6), pilih **Mulai rekam**, izinkan mikrofon, lalu **Hentikan rekaman**. Putar audio untuk mendengarkan, centang persetujuan, lalu pilih **Minta koreksi rekaman**. Tidak ada pemilih berkas di latihan harian; tombol koreksi baru aktif setelah ada rekaman atau kiriman tersimpan untuk dicoba lagi. Token pelajar tetap diperlukan melalui **Koneksi penilaian AI**. Hasil terbaru langsung menampilkan transkrip, koreksi, alasan, dan langkah latihan berikut; **Latih ulang dari koreksi ini** membuka rekaman baru yang terhubung dengan kiriman sebelumnya. Ini alur rekam–koreksi, bukan percakapan suara real-time. Catatan/revisi, riwayat, dan arsip manual terlipat agar tidak menghalangi mikrofon.
+
+Rekaman tidak dikirim otomatis. Memerlukan HTTPS/localhost dan browser dengan MediaRecorder. Bila mikrofon ditolak, izinkan melalui pengaturan browser dan coba lagi. Batas 5 menit / 10 MiB; timer dapat terlambat saat tab ditangguhkan. Berpindah halaman membatalkan take aktif dan melepaskan mikrofon.
 
 Take selesai disimpan lokal di IndexedDB per minggu/hari; take baru mengganti draft lokal, bukan kiriman terdahulu. JSON ekspor tidak memuat Blob audio: unduh audio terpisah. Gemini melalui backend 9router mentranskripsikan audio, kemudian mengoreksi grammar dalam bahasa Indonesia dengan kutipan dan perbaikan. Transkrip dapat salah; pronunciation, keterpahaman, kelancaran, dan interaksi tidak diberi skor berdasarkan teks saja. Latihan harian beserta revisinya dipisahkan dari tes mingguan/checkpoint; tidak menaikkan status penguasaan.
 

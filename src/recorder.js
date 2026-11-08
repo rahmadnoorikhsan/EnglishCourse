@@ -8,7 +8,7 @@ export function recorderView() {
     <span>Rekam suara langsung</span>
     <p class="muted">Mikrofon hanya aktif setelah kamu memilih Mulai rekam dan memberi izin. Maksimal 5 menit / 10 MiB. Rekaman tidak dikirim otomatis.</p>
     <div class="button-row">
-      <button type="button" class="button secondary" data-recorder-start>Mulai rekam</button>
+      <button type="button" class="button primary" data-recorder-start>Mulai rekam</button>
       <button type="button" class="button secondary" data-recorder-stop disabled>Hentikan rekaman</button>
       <output data-recorder-elapsed aria-label="Durasi rekaman" aria-live="off">00:00 / 05:00</output>
     </div>
@@ -28,9 +28,9 @@ function stopTracks(stream) {
 
 function microphoneError(error) {
   if (error?.name === 'NotAllowedError' || error?.name === 'SecurityError') return 'Izin mikrofon ditolak. Izinkan mikrofon di pengaturan browser, lalu coba lagi.';
-  if (error?.name === 'NotFoundError') return 'Mikrofon tidak ditemukan. Hubungkan mikrofon atau unggah berkas audio.';
+  if (error?.name === 'NotFoundError') return 'Mikrofon tidak ditemukan. Hubungkan mikrofon, lalu pilih Mulai rekam lagi.';
   if (error?.name === 'NotReadableError') return 'Mikrofon tidak dapat digunakan. Tutup aplikasi lain yang memakai mikrofon, lalu coba lagi.';
-  return 'Rekaman gagal. Coba lagi atau unggah berkas audio. Rekaman sebelumnya tetap tersedia.';
+  return 'Rekaman gagal. Coba rekam lagi. Rekaman sebelumnya tetap tersedia.';
 }
 
 /**
@@ -112,7 +112,7 @@ export function mountRecorder(root, { file, onFile = () => {}, onError = () => {
       return;
     }
     if (!session.bytes || !EXTENSIONS[mime]) {
-      fail(session, 'Rekaman kosong atau formatnya tidak didukung. Coba lagi atau unggah berkas audio.');
+      fail(session, 'Rekaman kosong atau formatnya tidak didukung. Coba rekam lagi dengan browser terbaru.');
       return;
     }
     let recorded;
@@ -166,16 +166,16 @@ export function mountRecorder(root, { file, onFile = () => {}, onError = () => {
       onState(true);
       if (disposed || capture !== session) return;
       if (!globalThis.isSecureContext) {
-        fail(session, 'Mikrofon memerlukan koneksi HTTPS (atau localhost). Gunakan halaman aman atau unggah berkas audio.');
+        fail(session, 'Mikrofon memerlukan koneksi HTTPS (atau localhost). Buka website melalui HTTPS.');
         return;
       }
       if (!globalThis.navigator?.mediaDevices?.getUserMedia || typeof globalThis.MediaRecorder?.isTypeSupported !== 'function') {
-        fail(session, 'Browser ini belum mendukung rekaman mikrofon. Gunakan browser terbaru atau unggah berkas audio.');
+        fail(session, 'Browser ini belum mendukung rekaman mikrofon. Buka website dengan Chrome, Edge, Firefox, atau Safari terbaru.');
         return;
       }
       session.mime = FORMATS.find(type => MediaRecorder.isTypeSupported(type));
       if (!session.mime) {
-        fail(session, 'Browser ini tidak mendukung format rekaman WebM, Ogg, atau MP4. Unggah berkas audio sebagai gantinya.');
+        fail(session, 'Browser ini tidak mendukung format rekaman WebM, Ogg, atau MP4. Gunakan browser terbaru untuk merekam.');
         return;
       }
       audio.pause();

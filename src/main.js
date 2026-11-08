@@ -87,7 +87,7 @@ function render(focus = true, preserveClock = false) {
   if (route === 'hari-ini' && state.day !== 7) {
     const body = main.querySelector('.lesson-content');
     if (step === 2) {
-      body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', speakingPracticeView(state) + portfolioView(state));
+      body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', speakingPracticeView(state) + `<details class="learning-panel"><summary>Menulis & arsip manual (opsional, bukan untuk koreksi suara)</summary>${portfolioView(state)}</details>`);
       void mountSpeakingRecorder(main, learningContext());
     }
     if (step === 3 || step === 4) body.querySelector('.lesson-notes').insertAdjacentHTML('beforebegin', evaluationView(state));
